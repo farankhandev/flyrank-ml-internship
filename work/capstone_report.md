@@ -23,10 +23,35 @@ The model is a **decision-support tool**, not an automatic content-change system
 
 ## 2. Data safety
 
-Which data you used and which columns you deliberately excluded (and why). Leakage risks you
-considered — especially label-derived fields (`trend_direction`, `trend_pct`) and pseudonymous
-IDs (grouping only, never features). Confirm nothing client-identifying appears anywhere in
-`work/`.
+This analysis uses the **FlyRank internship warehouse full release** hosted on Hugging Face.
+
+### Data used
+
+The analysis used:
+
+* `dim_clients` — client-level metadata and data-history information.
+* `dim_content` — content-level metadata.
+* `fact_content_daily_performance` — daily search performance data.
+* `fact_content_query_90d` — aggregated content/query-level signals.
+
+The modeling dataset used historical performance and query-level signals from the available data.
+
+### Deliberately excluded data
+
+Client names, domains, URLs, search queries, and other client-identifying information were excluded from the public-facing analysis.
+
+Pseudonymous client identifiers were used only to create the **client-level train/test split**. They were not used as model features.
+
+### Leakage risks
+
+The decline label was based on the change in impressions between the previous 30-day period and the latest 30-day period.
+
+Label-derived fields such as `trend_direction` and `trend_pct` were not used as model features because they would directly reveal information about the outcome.
+
+The query-level signals came from the available 90-day query table. Because this window can overlap with the outcome period, these features create a potential temporal leakage concern. This limitation is explicitly disclosed in the analysis.
+
+No client-identifying information is intentionally included in the public-facing `work/` materials.
+
 
 ## 3. Baseline
 
