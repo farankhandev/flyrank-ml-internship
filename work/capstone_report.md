@@ -1,9 +1,9 @@
 # Capstone Report 
 
-- **Author:**
-- **Lane:**
-- **Repo:**
-- **Date:**
+Author: Faran Khan
+Lane: Machine Learning
+Repo: https://github.com/farankhandev/flyrank-ml-internship
+Date: September 6, 2026
 
 > Copy this file to `work/capstone_report.md` and fill it in as you build. The eight
 > sections mirror the Pass / Needs-Work rubric axes, so nothing here is optional.
