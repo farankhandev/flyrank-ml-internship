@@ -55,8 +55,23 @@ No client-identifying information is intentionally included in the public-facing
 
 ## 3. Baseline
 
-The transparent rule or score you built first. Why it's a fair comparison, and its numbers on
-the same data and metric as your model.
+The baseline for this analysis is a **Logistic Regression classifier** trained using the same five features and the same client-level train/test split as the Random Forest model.
+
+This provides a fair comparison because both models receive the same input data and are evaluated on the same unseen test set.
+
+On the client-level holdout test set:
+
+| Metric        | Logistic Regression |
+| ------------- | ------------------: |
+| ROC-AUC       |               0.504 |
+| Precision@50  |               0.460 |
+| Precision@100 |               0.550 |
+| Precision@500 |               0.546 |
+
+The observed declining-content base rate in the modeling dataset was **63.3%**. This provides important context when interpreting the Precision@K results.
+
+The baseline is intentionally simple so that the Random Forest can be evaluated against a transparent, reproducible reference model rather than against an arbitrary or weaker comparison.
+
 
 ## 4. Model / analysis
 
