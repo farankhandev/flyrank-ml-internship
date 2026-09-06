@@ -1,4 +1,4 @@
-# Capstone Report — <your lane>
+# Capstone Report 
 
 - **Author:**
 - **Lane:**
