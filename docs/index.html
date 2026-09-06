@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Machine Learning for Prioritizing Declining Content | Faran Khan</title>
+
+  <meta
+    name="description"
+    content="A machine learning research project testing whether historical search and query-level signals can prioritize content items showing signs of declining search performance."
+  />
+
+  <meta
+    name="keywords"
+    content="machine learning, SEO, content performance, Random Forest, Logistic Regression, search performance, Faran Khan, FlyRank"
+  />
+
+  <meta name="author" content="Faran Khan" />
+
+  <meta property="og:title" content="Machine Learning for Prioritizing Declining Content" />
+  <meta
+    property="og:description"
+    content="Research by Faran Khan testing machine learning for prioritizing content items showing signs of declining search performance."
+  />
+  <meta property="og:type" content="article" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f7f7f5;
+      color: #171717;
+      line-height: 1.7;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .container {
+      width: min(1080px, calc(100% - 40px));
+      margin: auto;
+    }
+
+    header {
+      padding: 80px 0 55px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #666;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      max-width: 900px;
+      font-size: clamp(2.4rem, 6vw, 4.8rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      margin: 0 0 24px;
+    }
+
+    .subtitle {
+      max-width: 760px;
+      font-size: 1.2rem;
+      color: #555;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 25px;
+      margin-top: 28px;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(247, 247, 245, 0.94);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #ddd;
+    }
+
+    nav .container {
+      display: flex;
+      gap: 22px;
+      overflow-x: auto;
+      padding: 15px 0;
+      white-space: nowrap;
+    }
+
+    nav a {
+      text-decoration: none;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    nav a:hover {
+      color: #000;
+    }
+
+    main {
+      padding: 60px 0;
+    }
+
+    section {
+      padding: 55px 0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    h2 {
+      font-size: 2rem;
+      letter-spacing: -0.025em;
+      margin: 0 0 25px;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 35px;
+    }
+
+    p {
+      max-width: 820px;
+    }
+
+    .abstract {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 35px;
+      border-radius: 18px;
+      margin-bottom: 20px;
+    }
+
+    .callout {
+      background: #171717;
+      color: white;
+      padding: 28px;
+      border-radius: 16px;
+      margin: 30px 0;
+      max-width: 850px;
+    }
+
+    .callout strong {
+      color: #fff;
+    }
+
+    ul,
+    ol {
+      max-width: 820px;
+    }
+
+    li {
+      margin: 10px 0;
+    }
+
+    table {
+      width: 100%;
+      max-width: 850px;
+      border-collapse: collapse;
+      background: white;
+      margin: 25px 0;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #e5e5e5;
+      text-align: left;
+    }
+
+    th {
+      background: #f0f0ed;
+      font-weight: 700;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin: 30px 0;
+    }
+
+    .metric {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 15px;
+      padding: 22px;
+    }
+
+    .metric-value {
+      display: block;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .metric-label {
+      color: #666;
+      font-size: 0.85rem;
+    }
+
+    .chart {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 18px;
+      padding: 18px;
+      margin: 30px 0;
+    }
+
+    .chart img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    .chart-placeholder {
+      padding: 50px 20px;
+      text-align: center;
+      color: #777;
+      background: #f5f5f2;
+      border-radius: 12px;
+    }
+
+    code {
+      background: #ececea;
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 0.9em;
+    }
+
+    .workflow {
+      font-size: 1.15rem;
+      font-weight: 700;
+      padding: 25px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 15px;
+      max-width: 850px;
+    }
+
+    footer {
+      padding: 55px 0;
+      color: #666;
+    }
+
+    footer a {
+      font-weight: 600;
+    }
+
+    @media (max-width: 750px) {
+      header {
+        padding: 55px 0 40px;
+      }
+
+      .container {
+        width: min(100% - 28px, 1080px);
+      }
+
+      .abstract {
+        padding: 24px;
+      }
+
+      .metric-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      table {
+        font-size: 0.9rem;
+      }
+
+      th,
+      td {
+        padding: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="container">
+      <div class="eyebrow">Machine Learning Research · FlyRank Internship</div>
+
+      <h1>
+        Machine Learning for Prioritizing Declining Content
+      </h1>
+
+      <p class="subtitle">
+        Can machine learning help identify which content items should receive
+        human review first when their search performance shows signs of decline?
+      </p>
+
+      <div class="meta">
+        <span><strong>Author:</strong> Faran Khan</span>
+        <span><strong>Lane:</strong> Machine Learning</span>
+        <span><strong>Date:</strong> September 6, 2026</span>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="container">
+      <a href="#abstract">Abstract</a>
+      <a href="#problem">Problem</a>
+      <a href="#data">Data</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="#limitations">Limitations</a>
+      <a href="#recommendations">Recommendations</a>
+      <a href="#reproducibility">Reproducibility</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <section id="abstract">
+      <div class="container">
+        <h2>Abstract</h2>
+
+        <div class="abstract">
+          <p>
+            This study asks whether machine learning can help prioritize content
+            items that show signs of declining search performance.
+            I compare a Random Forest classifier with a Logistic Regression
+            baseline using historical performance and query-level signals.
+            On a client-level holdout test set, the Random Forest achieved a
+            ROC-AUC of 0.604 compared with 0.504 for the baseline, and achieved
+            Precision@50 of 0.880 compared with 0.460.
+            These results suggest that the Random Forest can provide a useful
+            ranking signal for directing limited human review capacity.
+            The result is treated as a decision-support experiment rather than
+            evidence that content changes will cause future search performance
+            improvements.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="problem">
+      <div class="container">
+        <h2>1. Problem &amp; Research Question</h2>
+
+        <p>
+          This project supports the decision of which content items should
+          receive human review first when their search performance shows signs
+          of decline.
+        </p>
+
+        <ul>
+          <li><strong>Unit of analysis:</strong> Content item/page.</li>
+          <li>
+            <strong>Output:</strong> A model score and ranking of content items
+            by likelihood of belonging to the defined declining-performance group.
+          </li>
+          <li>
+            <strong>Human action:</strong> A reviewer investigates high-priority
+            pages before deciding whether a content change is appropriate.
+          </li>
+          <li>
+            <strong>Cost of a wrong call:</strong> A page may receive unnecessary
+            review, while a genuinely declining page may be missed or reviewed later.
+          </li>
+        </ul>
+
+        <div class="callout">
+          <strong>Important framing:</strong>
+          The model is a decision-support tool. It does not prove that changing
+          a page will improve future search performance.
+        </div>
+      </div>
+    </section>
+
+    <section id="data">
+      <div class="container">
+        <h2>2. Data</h2>
+
+        <p>
+          The analysis uses the FlyRank internship warehouse full release
+          hosted on Hugging Face.
+        </p>
+
+        <h3>Data used</h3>
+
+        <ul>
+          <li><code>dim_clients</code> — client-level metadata and data-history information.</li>
+          <li><code>dim_content</code> — content-level metadata.</li>
+          <li><code>fact_content_daily_performance</code> — daily search performance data.</li>
+          <li><code>fact_content_query_90d</code> — aggregated content/query-level signals.</li>
+        </ul>
+
+        <h3>Modeling window</h3>
+
+        <p>
+          The modeling dataset uses a 60-day performance window split into two
+          30-day periods. Content items were required to have at least 100
+          impressions in the previous 30-day period.
+        </p>
+
+        <div class="metric-grid">
+          <div class="metric">
+            <span class="metric-value">111,247</span>
+            <span class="metric-label">Content items with sufficient history</span>
+          </div>
+
+          <div class="metric">
+            <span class="metric-value">102,203</span>
+            <span class="metric-label">Rows remaining for modeling</span>
+          </div>
+
+          <div class="metric">
+            <span class="metric-value">63.3%</span>
+            <span class="metric-label">Declining-content base rate</span>
+          </div>
+
+          <div class="metric">
+            <span class="metric-value">13</span>
+            <span class="metric-label">Clients in test set</span>
+          </div>
+        </div>
+
+        <h3>Data safety</h3>
+
+        <p>
+          Client names, domains, URLs, search queries, and other client-identifying
+          information were excluded from the public-facing analysis.
+          Pseudonymous client identifiers were used only to create the client-level
+          train/test split and were not used as model features.
+        </p>
+
+        <h3>Leakage consideration</h3>
+
+        <p>
+          The query-level signals came from an available 90-day query table.
+          Because this window can overlap with the outcome period, these features
+          create a potential temporal leakage concern. The results are therefore
+          presented cautiously.
+        </p>
+      </div>
+    </section>
+
+    <section id="method">
+      <div class="container">
+        <h2>3. Methodology</h2>
+
+        <h3>Prediction target</h3>
+
+        <p>
+          A content item was labeled as declining when its latest 30-day
+          impressions were less than 80% of its previous 30-day impressions,
+          representing an observed decline of more than 20%.
+        </p>
+
+        <h3>Features</h3>
+
+        <ul>
+          <li><code>imp_prev30</code> — previous 30-day impressions</li>
+          <li><code>visible_queries</code> — visible query count</li>
+          <li><code>rare_share</code> — rare-query impression share</li>
+          <li><code>anon_share</code> — anonymized-query impression share</li>
+          <li><code>top_query_share</code> — top-query impression share</li>
+        </ul>
+
+        <h3>Model</h3>
+
+        <p>
+          I trained a Random Forest Classifier with 200 trees and a fixed random
+          seed of 42. The model was selected because it can capture nonlinear
+          relationships and interactions between the available signals.
+        </p>
+
+        <h3>Baseline</h3>
+
+        <p>
+          Logistic Regression was used as the baseline. Both models received the
+          same five features and were evaluated on the same client-level holdout
+          test set.
+        </p>
+
+        <h3>Validation</h3>
+
+        <p>
+          I used <code>GroupShuffleSplit</code> to keep clients separated between
+          training and testing. Approximately 75% of modeling rows were used for
+          training and 25% for testing.
+        </p>
+
+        <p>
+          The final test set contained <strong>51,702 rows from 13 clients</strong>.
+        </p>
+
+        <h3>Evaluation metrics</h3>
+
+        <p>
+          Because the practical goal is prioritization, the primary evaluation
+          focuses on ROC-AUC and Precision@K rather than overall accuracy.
+        </p>
+      </div>
+    </section>
+
+    <section id="results">
+      <div class="container">
+        <h2>4. Results</h2>
+
+        <p>
+          The Random Forest achieved stronger ranking performance than the
+          Logistic Regression baseline on the same client-level holdout test set.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Logistic Regression</th>
+              <th>Random Forest</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td>ROC-AUC</td>
+              <td>0.504</td>
+              <td><strong>0.604</strong></td>
+            </tr>
+
+            <tr>
+              <td>Precision@50</td>
+              <td>0.460</td>
+              <td><strong>0.880</strong></td>
+            </tr>
+
+            <tr>
+              <td>Precision@100</td>
+              <td>0.550</td>
+              <td><strong>0.870</strong></td>
+            </tr>
+
+            <tr>
+              <td>Precision@500</td>
+              <td>0.546</td>
+              <td><strong>0.840</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          <strong>Key result:</strong>
+          At the top 50 ranked items, 88% were labeled as declining with the
+          Random Forest, compared with 46% for the Logistic Regression baseline.
+        </div>
+
+        <h3>Model performance</h3>
+
+        <p>
+          The Random Forest achieved a ROC-AUC of <strong>0.604</strong>,
+          compared with <strong>0.504</strong> for Logistic Regression.
+          It also produced substantially higher Precision@K values.
+        </p>
+
+        <h3>Accuracy is not the main objective</h3>
+
+        <p>
+          The Random Forest test accuracy was approximately <strong>61.3%</strong>,
+          while Logistic Regression achieved approximately <strong>65.8%</strong>.
+          The Random Forest was therefore not more accurate overall.
+        </p>
+
+        <p>
+          This is important because the intended use case is prioritization.
+          The strongest practical result is the model's ability to concentrate
+          declining items near the top of the ranking.
+        </p>
+
+        <h3>Feature importance</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Importance</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td><code>rare_share</code></td>
+              <td>0.236</td>
+            </tr>
+            <tr>
+              <td><code>anon_share</code></td>
+              <td>0.233</td>
+            </tr>
+            <tr>
+              <td><code>imp_prev30</code></td>
+              <td>0.222</td>
+            </tr>
+            <tr>
+              <td><code>top_query_share</code></td>
+              <td>0.192</td>
+            </tr>
+            <tr>
+              <td><code>visible_queries</code></td>
+              <td>0.117</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Feature importance provides directional model interpretation.
+          It should not be interpreted as evidence that a feature causes
+          search-performance decline.
+        </p>
+
+        <h3>ROC Curve</h3>
+
+        <div class="chart">
+          <img
+            src="paper_artifacts/roc_curve.png"
+            alt="ROC curve comparing Random Forest and Logistic Regression"
+          />
+        </div>
+
+        <h3>Precision@K</h3>
+
+        <div class="chart">
+          <img
+            src="paper_artifacts/precision_at_k.png"
+            alt="Precision at K comparison between Random Forest and Logistic Regression"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section id="limitations">
+      <div class="container">
+        <h2>5. Limitations</h2>
+
+        <ul>
+          <li>
+            The client-level holdout provides a stronger test of generalization,
+            but also makes the prediction task more difficult.
+          </li>
+
+          <li>
+            The model predicts the defined declining-impressions label. It does
+            not prove that refreshing content will improve future performance.
+          </li>
+
+          <li>
+            The dataset is an anonymized internship dataset and should not be
+            interpreted as evidence about any specific company or website.
+          </li>
+
+          <li>
+            The available features do not capture every factor that can affect
+            search performance, such as search-engine changes, changing search
+            intent, or competitive shifts.
+          </li>
+
+          <li>
+            The available 90-day query signals may overlap with the outcome period,
+            creating a potential temporal leakage concern.
+          </li>
+
+          <li>
+            The Random Forest performed better on ranking metrics in this experiment,
+            but that does not establish that it will perform equally well on every
+            future dataset or client.
+          </li>
+        </ul>
+
+        <div class="callout">
+          <strong>Honest framing:</strong>
+          This should be treated as a prioritization experiment and
+          decision-support tool, not a production forecasting system.
+        </div>
+      </div>
+    </section>
+
+    <section id="recommendations">
+      <div class="container">
+        <h2>6. Ranked Recommendations</h2>
+
+        <p>
+          The model should be used to prioritize human review rather than
+          automatically change content.
+        </p>
+
+        <ol>
+          <li>
+            <strong>Review the highest-ranked pages first.</strong>
+            Start with pages receiving the highest model scores.
+          </li>
+
+          <li>
+            <strong>Investigate search and query signals.</strong>
+            Review historical impressions and available query-level signals
+            for high-priority pages.
+          </li>
+
+          <li>
+            <strong>Review content before making changes.</strong>
+            Consider search intent, content quality, freshness, competition,
+            and whether the page still meets user needs.
+          </li>
+
+          <li>
+            <strong>Prioritize limited resources.</strong>
+            Use the ranking when a team cannot investigate every page.
+          </li>
+
+          <li>
+            <strong>Monitor results after changes.</strong>
+            Measure subsequent search performance rather than assuming that
+            a model recommendation guarantees improvement.
+          </li>
+        </ol>
+
+        <h3>Recommended workflow</h3>
+
+        <div class="workflow">
+          Model ranking → Human review → Content decision → Refresh/test → Monitor performance
+        </div>
+      </div>
+    </section>
+
+    <section id="reproducibility">
+      <div class="container">
+        <h2>7. Reproducibility</h2>
+
+        <p>
+          The project materials are organized in the repository so the analysis
+          can be reviewed and rerun from a fresh clone.
+        </p>
+
+        <h3>Key files</h3>
+
+        <ul>
+          <li><code>work/notebooks/capstone.ipynb</code> — capstone analysis.</li>
+          <li><code>notebooks/03_working_with_the_full_release.ipynb</code> — full-release analysis.</li>
+          <li><code>work/notebooks/</code> — weekly research and modeling notebooks.</li>
+          <li><code>work/scripts/</code> — analysis and report-generation scripts.</li>
+          <li><code>work/README.md</code> — project documentation.</li>
+        </ul>
+
+        <h3>Model settings</h3>
+
+        <ul>
+          <li>Random Forest: 200 trees.</li>
+          <li>Random seed: 42.</li>
+          <li>Validation: client-level <code>GroupShuffleSplit</code>.</li>
+          <li>Approximate train/test ratio: 75% / 25%.</li>
+          <li>Test set: 51,702 rows from 13 clients.</li>
+        </ul>
+
+        <p>
+          The analysis does not commit private datasets or credentials to the
+          repository. Hugging Face access credentials are supplied at runtime
+          when required.
+        </p>
+
+        <p>
+          The final capstone notebook can be run top-to-bottom with
+          <strong>Runtime → Run all</strong> to verify that the documented
+          analysis remains executable.
+        </p>
+
+        <h3>Source repository</h3>
+
+        <p>
+          <a
+            href="https://github.com/farankhandev/flyrank-ml-internship"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View the project repository on GitHub →
+          </a>
+        </p>
+      </div>
+    </section>
+
+    <section id="acknowledgments">
+      <div class="container">
+        <h2>8. Acknowledgments</h2>
+
+        <p>
+          Built on the
+          <a
+            href="https://flyrank.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            FlyRank ML Internship dataset
+          </a>.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>
+        Research by <strong>Faran Khan</strong> · Machine Learning
+      </p>
+
+      <p>
+        <a
+          href="https://github.com/farankhandev/flyrank-ml-internship"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub Repository
+        </a>
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>
