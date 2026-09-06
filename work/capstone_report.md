@@ -101,23 +101,132 @@ The model is used for **ranking and prioritization**, not for automatically deci
 
 ## 5. Evaluation
 
-Your split (grouped by client? time-aware?) and why. Metrics, model vs baseline **on the same
-split**. What the errors look like — a short error analysis beats a big metric table.
+The evaluation used a **client-level holdout split** with `GroupShuffleSplit`.
+
+Approximately 75% of the modeling rows were used for training and 25% for testing, while keeping clients separated between the two sets. The final test set contained **51,702 rows from 13 clients**.
+
+This design tests whether the model can generalize to clients that were not included in training.
+
+### Results
+
+The Random Forest and Logistic Regression baseline were evaluated on the **same test set**.
+
+| Metric        | Logistic Regression | Random Forest |
+| ------------- | ------------------: | ------------: |
+| ROC-AUC       |               0.504 |     **0.604** |
+| Precision@50  |               0.460 |     **0.880** |
+| Precision@100 |               0.550 |     **0.870** |
+| Precision@500 |               0.546 |     **0.840** |
+
+The observed declining-content base rate was **63.3%**.
+
+The Random Forest achieved higher ROC-AUC and substantially higher Precision@K than the baseline. At the top 50 ranked items, 88% were labeled as declining, compared with 46% for the baseline.
+
+### Error analysis
+
+The Random Forest was not simply more accurate overall. Its test accuracy was approximately **61.3%**, compared with **65.8%** for Logistic Regression.
+
+This is important because the goal of the project is **prioritization**, not maximizing overall classification accuracy. The model's stronger top-ranked performance is therefore more relevant to the intended human-review workflow.
+
+The results should be treated as measured ranking performance on this holdout test set, not as proof of future content-refresh success.
+
 
 ## 6. Interpretation
 
-What the model/clusters actually found. Feature importances or cluster profiles in plain
-words. Surprises and negative results — a well-understood "no effect" is a valid result.
+The Random Forest identified several signals as important for distinguishing content items labeled as declining.
+
+### Feature importance
+
+The Random Forest feature importances were:
+
+| Feature           | Importance |
+| ----------------- | ---------: |
+| `rare_share`      |      0.236 |
+| `anon_share`      |      0.233 |
+| `imp_prev30`      |      0.222 |
+| `top_query_share` |      0.192 |
+| `visible_queries` |      0.117 |
+
+The largest contributions came from rare-query impression share and anonymized-query impression share, followed by previous 30-day impressions and top-query impression share.
+
+These values describe how much each feature contributed to the Random Forest's decisions. They should be treated as **directional model interpretation**, not as evidence that any feature causes search-performance decline.
+
+### What the model found
+
+The strongest practical result was in the ranking metrics. The Random Forest concentrated more declining items near the top of its ranking than the Logistic Regression baseline.
+
+At the top 50 items, the Random Forest achieved Precision@50 of **0.880**, compared with **0.460** for the baseline.
+
+### Negative result / important surprise
+
+The Random Forest did **not** have higher overall accuracy than the baseline. Random Forest accuracy was approximately **61.3%**, while Logistic Regression accuracy was approximately **65.8%**.
+
+This reinforces that the model's value in this experiment is primarily its ability to **prioritize items for review**, rather than to maximize overall classification accuracy.
+
+The results should not be interpreted as identifying causal drivers of declining search performance.
 
 ## 7. Recommendation
 
-The ranked actions or decisions your output supports, and how a FlyRank editor would use them
-tomorrow. State your confidence and the limits explicitly.
+The model should be used to **prioritize human review**, not to automatically change content.
+
+### Ranked actions
+
+1. **Review the highest-ranked pages first.**
+   Start with pages receiving the highest model scores because the Random Forest achieved a Precision@50 of **0.880** on the holdout test set.
+
+2. **Investigate search and query signals.**
+   Review historical impressions and available query-level signals to understand why a high-priority page may be showing signs of decline.
+
+3. **Review the content before making changes.**
+   A human reviewer should consider search intent, content quality, freshness, competition, and whether the page still meets user needs.
+
+4. **Use the ranking when review capacity is limited.**
+   If a team cannot investigate every page, the ranking can help focus attention on a smaller high-priority group.
+
+5. **Monitor results after any content change.**
+   If a page is refreshed, its subsequent search performance should be monitored. The model does not establish that the refresh caused an improvement.
+
+### Recommended workflow
+
+**Model ranking → Human review → Content decision → Refresh/test → Monitor performance**
+
+### Confidence and limits
+
+Confidence in the ranking result is **moderate and experimental**. The Random Forest performed better than the Logistic Regression baseline on ROC-AUC and Precision@K, but the experiment has a potential temporal leakage concern because the available 90-day query signals may overlap with the outcome period.
+
+The model should therefore be treated as a **directional decision-support tool**, not a production forecasting system or an automated content recommendation engine.
+
 
 ## 8. Reproducibility
 
-The exact commands to re-run everything from a fresh clone, your random seeds, and your
-environment (`pip freeze` highlights or `requirements.txt` deltas).
+The project materials are organized in the repository so that the analysis can be reviewed and rerun from a fresh clone.
+
+### Key files
+
+* `work/notebooks/capstone.ipynb` — capstone analysis that mirrors the research paper.
+* `notebooks/03_working_with_the_full_release.ipynb` — full-release data analysis and modeling workflow.
+* `work/notebooks/` — weekly research, modeling, validation, and recommendation notebooks.
+* `work/scripts/` — scripts used for feature preparation, modeling, validation, and report generation.
+* `work/README.md` — project and reproducibility documentation.
+
+### Model settings
+
+* Random Forest: 200 trees.
+* Random seed: 42.
+* Validation: client-level `GroupShuffleSplit`.
+* Approximate train/test ratio: 75% / 25%.
+* Test set: 51,702 rows from 13 clients.
+
+The analysis does not commit private datasets or credentials to the repository. Hugging Face access credentials are supplied at runtime when required.
+
+### Re-running the analysis
+
+After cloning the repository, the notebooks can be opened in Jupyter or Google Colab. The full-release notebook loads the hosted data through the documented DuckDB workflow, prepares the modeling features, trains the models, evaluates the results, and generates the paper artifacts.
+
+The final capstone notebook can then be run top-to-bottom with **Runtime → Run all** to verify that the documented analysis remains executable.
+
+All reported metrics in this report correspond to the completed analysis and documented holdout evaluation.
+
 
 ---
 
