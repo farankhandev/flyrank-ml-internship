@@ -1,8 +1,11 @@
 # Capstone Report
 
 **Author:** Faran Khan
+
 **Lane:** Machine Learning
+
 **Repo:** https://github.com/farankhandev/flyrank-ml-internship
+
 **Date:** September 6, 2026
 
 ## 1. Problem framing
