@@ -75,8 +75,29 @@ The baseline is intentionally simple so that the Random Forest can be evaluated 
 
 ## 4. Model / analysis
 
-Your method and why it fits the lane. The exact feature list (and what you left out on
-purpose). The target or proxy definition, in one sentence.
+I trained a **Random Forest Classifier** with 200 trees and a fixed random seed of 42.
+
+### Features
+
+The model used five features:
+
+* `imp_prev30` — previous 30-day impressions
+* `visible_queries` — visible query count
+* `rare_share` — rare-query impression share
+* `anon_share` — anonymized-query impression share
+* `top_query_share` — top-query impression share
+
+I deliberately excluded client identifiers and label-derived fields such as `trend_direction` and `trend_pct` from the model features.
+
+### Target definition
+
+A content item was labeled as declining when its latest 30-day impressions were **less than 80% of its previous 30-day impressions**, representing an observed decline of more than 20%.
+
+### Why this model
+
+A Random Forest can capture nonlinear relationships and interactions between the available signals while still providing feature-importance measures for interpretation.
+
+The model is used for **ranking and prioritization**, not for automatically deciding which content should be changed.
 
 ## 5. Evaluation
 
