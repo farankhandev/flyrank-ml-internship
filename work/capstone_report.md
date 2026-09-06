@@ -223,15 +223,3 @@ After cloning the repository, the notebooks can be opened in Jupyter or Google C
 The final capstone notebook can then be run top-to-bottom with **Runtime → Run all** to verify that the documented analysis remains executable.
 
 All reported metrics in this report correspond to the completed analysis and documented holdout evaluation.
-
-
-
----
-
-> **Claims checklist before submitting:** observed / measured / directional / decision-support
-> **Metrics vs. base rate:** report your task's base rate (majority-class %) next to any
-> precision@K or accuracy — a high score can just be a high base rate. AUC / lift over
-> baseline are the honest discrimination numbers.
-> language everywhere · no causal claims without an experiment or causal design · no
-> "predicted Google's algorithm" · no client-identifying details · numbers in this report
-> match a fresh re-run.
