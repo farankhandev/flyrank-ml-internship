@@ -10,9 +10,16 @@
 
 ## 1. Problem framing
 
-What decision does this support? Name the unit of analysis (page, client, day…), the output
-(score, rank, cluster, report), the action a human takes from it, and the cost of a wrong
-call. Why does data/ML help here at all?
+This project supports the decision of **which content items should receive human review first when their search performance shows signs of decline**.
+
+* **Unit of analysis:** Content item/page.
+* **Output:** A model score and ranking of content items by likelihood of belonging to the defined declining-performance group.
+* **Human action:** A reviewer uses the ranking to investigate high-priority pages before deciding whether any content change is appropriate.
+* **Cost of a wrong call:** A high-priority page may receive unnecessary review, while a genuinely declining page may be missed or reviewed later.
+* **Why ML helps:** A large content collection can contain many pages, making manual prioritization inefficient. Machine learning can combine multiple historical and query-level signals to produce a consistent ranking for human review.
+
+The model is a **decision-support tool**, not an automatic content-change system. It does not prove that changing a page will improve future search performance.
+
 
 ## 2. Data safety
 
