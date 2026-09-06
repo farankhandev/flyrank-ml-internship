@@ -1,12 +1,9 @@
-# Capstone Report 
+# Capstone Report
 
-Author: Faran Khan
-Lane: Machine Learning
-Repo: https://github.com/farankhandev/flyrank-ml-internship
-Date: September 6, 2026
-
-> Copy this file to `work/capstone_report.md` and fill it in as you build. The eight
-> sections mirror the Pass / Needs-Work rubric axes, so nothing here is optional.
+**Author:** Faran Khan
+**Lane:** Machine Learning
+**Repo:** https://github.com/farankhandev/flyrank-ml-internship
+**Date:** September 6, 2026
 
 ## 1. Problem framing
 
@@ -19,7 +16,6 @@ This project supports the decision of **which content items should receive human
 * **Why ML helps:** A large content collection can contain many pages, making manual prioritization inefficient. Machine learning can combine multiple historical and query-level signals to produce a consistent ranking for human review.
 
 The model is a **decision-support tool**, not an automatic content-change system. It does not prove that changing a page will improve future search performance.
-
 
 ## 2. Data safety
 
@@ -52,7 +48,6 @@ The query-level signals came from the available 90-day query table. Because this
 
 No client-identifying information is intentionally included in the public-facing `work/` materials.
 
-
 ## 3. Baseline
 
 The baseline for this analysis is a **Logistic Regression classifier** trained using the same five features and the same client-level train/test split as the Random Forest model.
@@ -71,7 +66,6 @@ On the client-level holdout test set:
 The observed declining-content base rate in the modeling dataset was **63.3%**. This provides important context when interpreting the Precision@K results.
 
 The baseline is intentionally simple so that the Random Forest can be evaluated against a transparent, reproducible reference model rather than against an arbitrary or weaker comparison.
-
 
 ## 4. Model / analysis
 
@@ -120,7 +114,7 @@ The Random Forest and Logistic Regression baseline were evaluated on the **same 
 
 The observed declining-content base rate was **63.3%**.
 
-The Random Forest achieved higher ROC-AUC and substantially higher Precision@K than the baseline. At the top 50 ranked items, 88% were labeled as declining, compared with 46% for the baseline.
+The Random Forest achieved higher ROC-AUC and substantially higher Precision@K than the baseline. At the top 50 ranked items, **88% were labeled as declining**, compared with **46% for the baseline**.
 
 ### Error analysis
 
@@ -129,7 +123,6 @@ The Random Forest was not simply more accurate overall. Its test accuracy was ap
 This is important because the goal of the project is **prioritization**, not maximizing overall classification accuracy. The model's stronger top-ranked performance is therefore more relevant to the intended human-review workflow.
 
 The results should be treated as measured ranking performance on this holdout test set, not as proof of future content-refresh success.
-
 
 ## 6. Interpretation
 
@@ -196,7 +189,6 @@ Confidence in the ranking result is **moderate and experimental**. The Random Fo
 
 The model should therefore be treated as a **directional decision-support tool**, not a production forecasting system or an automated content recommendation engine.
 
-
 ## 8. Reproducibility
 
 The project materials are organized in the repository so that the analysis can be reviewed and rerun from a fresh clone.
@@ -221,11 +213,14 @@ The analysis does not commit private datasets or credentials to the repository. 
 
 ### Re-running the analysis
 
+The repository contains the notebooks and scripts needed to review and rerun the analysis.
+
 After cloning the repository, the notebooks can be opened in Jupyter or Google Colab. The full-release notebook loads the hosted data through the documented DuckDB workflow, prepares the modeling features, trains the models, evaluates the results, and generates the paper artifacts.
 
 The final capstone notebook can then be run top-to-bottom with **Runtime → Run all** to verify that the documented analysis remains executable.
 
 All reported metrics in this report correspond to the completed analysis and documented holdout evaluation.
+
 
 
 ---
