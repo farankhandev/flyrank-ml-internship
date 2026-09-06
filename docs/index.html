@@ -7,33 +7,17 @@
 
   <title>Machine Learning for Prioritizing Declining Content | Faran Khan</title>
 
-<meta
-name="description"
-content="A machine learning study exploring whether declining content can be prioritized for human review using historical search performance and query-level signals."
-
->
-
-<meta
-name="keywords"
-content="machine learning, content performance, SEO, Random Forest, Logistic Regression, Faran Khan"
-
->
-
+  <meta name="description" content="A machine learning study exploring whether declining content can be prioritized for human review using historical search performance and query-level signals.">
+  <meta name="keywords" content="machine learning, content performance, SEO, Random Forest, Logistic Regression, Faran Khan">
   <meta name="author" content="Faran Khan">
 
   <meta property="og:title" content="Machine Learning for Prioritizing Declining Content">
-  <meta
-    property="og:description"
-    content="A machine learning study exploring whether declining content can be prioritized for human review."
-  >
+  <meta property="og:description" content="A machine learning study exploring whether declining content can be prioritized for human review.">
   <meta property="og:type" content="article">
 
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Machine Learning for Prioritizing Declining Content">
-  <meta
-    name="twitter:description"
-    content="A machine learning study by Faran Khan on prioritizing declining content for human review."
-  >
+  <meta name="twitter:description" content="A machine learning study by Faran Khan on prioritizing declining content for human review.">
 
   <style>
     :root {
@@ -59,15 +43,8 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     }
 
     body {
-      font-family:
-        Inter,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Roboto,
-        Helvetica,
-        Arial,
-        sans-serif;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Helvetica, Arial, sans-serif;
       color: var(--text);
       background: var(--background);
       line-height: 1.75;
@@ -82,30 +59,30 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
       text-decoration: underline;
     }
 
-    .hero {
-      background: var(--dark);
-      color: white;
-      padding: 80px 20px;
-    }
-
     .container {
       width: min(1050px, calc(100% - 40px));
       margin: 0 auto;
     }
 
+    .hero {
+      padding: 80px 20px;
+      background: var(--dark);
+      color: #fff;
+    }
+
     .hero h1 {
       max-width: 900px;
+      margin-bottom: 24px;
       font-size: clamp(2.3rem, 5vw, 4rem);
       line-height: 1.12;
       letter-spacing: -0.03em;
-      margin-bottom: 24px;
     }
 
     .hero-intro {
       max-width: 780px;
-      font-size: 1.2rem;
-      color: #d1d5db;
       margin-bottom: 28px;
+      color: #d1d5db;
+      font-size: 1.2rem;
     }
 
     .author {
@@ -118,24 +95,24 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     }
 
     section {
+      margin-bottom: 25px;
+      padding: 38px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 38px;
-      margin-bottom: 25px;
     }
 
     h2 {
+      margin-bottom: 22px;
       color: var(--heading);
       font-size: 1.8rem;
       line-height: 1.3;
-      margin-bottom: 22px;
     }
 
     h3 {
+      margin: 28px 0 10px;
       color: var(--heading);
       font-size: 1.2rem;
-      margin: 28px 0 10px;
     }
 
     p {
@@ -143,8 +120,8 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     }
 
     ul {
-      padding-left: 24px;
       margin-bottom: 18px;
+      padding-left: 24px;
     }
 
     li {
@@ -152,8 +129,8 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     }
 
     code {
-      background: #f3f4f6;
       padding: 2px 6px;
+      background: #f3f4f6;
       border-radius: 5px;
       font-size: 0.9em;
     }
@@ -175,19 +152,19 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     }
 
     .metric {
+      padding: 22px 15px;
       background: #f8fafc;
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 22px 15px;
       text-align: center;
     }
 
     .metric strong {
       display: block;
+      margin-bottom: 7px;
       color: var(--heading);
       font-size: 1.8rem;
       line-height: 1.2;
-      margin-bottom: 7px;
     }
 
     .metric span {
@@ -196,14 +173,14 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     }
 
     .table-wrapper {
-      overflow-x: auto;
       margin: 22px 0;
+      overflow-x: auto;
     }
 
     table {
       width: 100%;
-      border-collapse: collapse;
       min-width: 500px;
+      border-collapse: collapse;
     }
 
     th,
@@ -220,8 +197,8 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     }
 
     .better {
-      font-weight: 700;
       color: var(--accent);
+      font-weight: 700;
     }
 
     .chart {
@@ -235,9 +212,9 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
       max-width: 850px;
       height: auto;
       margin: 0 auto;
+      background: #fff;
       border: 1px solid var(--border);
       border-radius: 10px;
-      background: white;
     }
 
     .chart-caption {
@@ -250,11 +227,11 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     .workflow {
       margin-top: 25px;
       padding: 20px;
-      border-radius: 10px;
       background: var(--dark);
-      color: white;
-      text-align: center;
+      border-radius: 10px;
+      color: #fff;
       font-weight: 600;
+      text-align: center;
     }
 
     .links {
@@ -266,10 +243,10 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
 
     .button {
       display: inline-block;
-      background: var(--accent);
-      color: white;
       padding: 11px 17px;
+      background: var(--accent);
       border-radius: 8px;
+      color: #fff;
       font-weight: 600;
     }
 
@@ -279,19 +256,19 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     }
 
     .note {
-      padding: 17px 20px;
       margin-top: 20px;
-      border-radius: 9px;
+      padding: 17px 20px;
       background: #f9fafb;
       border: 1px solid var(--border);
+      border-radius: 9px;
       color: var(--muted);
     }
 
     footer {
-      text-align: center;
       padding: 35px 20px 50px;
       color: var(--muted);
       font-size: 0.9rem;
+      text-align: center;
     }
 
     @media (max-width: 800px) {
@@ -309,12 +286,12 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     }
 
     @media (max-width: 500px) {
-      .metrics {
-        grid-template-columns: 1fr;
-      }
-
       .container {
         width: min(100% - 28px, 1050px);
+      }
+
+      .metrics {
+        grid-template-columns: 1fr;
       }
 
       section {
@@ -334,13 +311,11 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
 </head>
 
 <body>
-
   <header class="hero">
     <div class="container">
+      <h1>Machine Learning for Prioritizing Declining Content</h1>
 
 ```
-  <h1>Machine Learning for Prioritizing Declining Content</h1>
-
   <p class="hero-intro">
     A practical machine learning study exploring whether content showing
     declining search performance can be ranked for human review.
@@ -349,22 +324,17 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
   <p class="author">
     <strong>Faran Khan</strong> · Machine Learning · FlyRank ML Internship · 2026
   </p>
-
 </div>
 ```
 
   </header>
 
   <main>
+    <div class="container">
+      <section class="abstract">
+        <h2>Abstract</h2>
 
 ```
-<div class="container">
-
-  <!-- ABSTRACT -->
-  <section class="abstract">
-
-    <h2>Abstract</h2>
-
     <p>
       This project asks whether machine learning can help identify content
       items whose search performance is declining. I used historical
@@ -378,12 +348,9 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
       first, but they do not show that changing a page will improve its
       future search performance.
     </p>
-
   </section>
 
-  <!-- 1 -->
   <section>
-
     <h2>1. Problem</h2>
 
     <h3>Research Question</h3>
@@ -405,12 +372,9 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
       not intended to make automatic content decisions or claim that a
       particular change will improve rankings or traffic.
     </p>
-
   </section>
 
-  <!-- 2 -->
   <section>
-
     <h2>2. Data</h2>
 
     <h3>Data Source</h3>
@@ -424,24 +388,10 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     <p>The main tables used were:</p>
 
     <ul>
-      <li>
-        <code>dim_clients</code> — client-level metadata and available
-        history dates.
-      </li>
-
-      <li>
-        <code>dim_content</code> — content-level metadata.
-      </li>
-
-      <li>
-        <code>fact_content_daily_performance</code> — daily Google Search
-        Console performance data.
-      </li>
-
-      <li>
-        <code>fact_content_query_90d</code> — content and query-level
-        signals aggregated over the available 90-day window.
-      </li>
+      <li><code>dim_clients</code> — client-level metadata and available history dates.</li>
+      <li><code>dim_content</code> — content-level metadata.</li>
+      <li><code>fact_content_daily_performance</code> — daily Google Search Console performance data.</li>
+      <li><code>fact_content_query_90d</code> — content and query-level signals aggregated over the available 90-day window.</li>
     </ul>
 
     <h3>Modeling Window</h3>
@@ -468,12 +418,9 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
       No client names, domains, URLs, search queries, or other private
       identifying information are included in this public analysis.
     </div>
-
   </section>
 
-  <!-- 3 -->
   <section>
-
     <h2>3. Methodology</h2>
 
     <h3>Defining Declining Content</h3>
@@ -556,16 +503,12 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
       For that reason, I treat these results as an experiment in
       prioritization rather than a production-ready forecasting system.
     </p>
-
   </section>
 
-  <!-- 4 -->
   <section>
-
     <h2>4. Results</h2>
 
     <div class="metrics">
-
       <div class="metric">
         <strong>0.604</strong>
         <span>Random Forest ROC-AUC</span>
@@ -585,15 +528,12 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
         <strong>63.3%</strong>
         <span>Declining Base Rate</span>
       </div>
-
     </div>
 
     <h3>Model vs Baseline</h3>
 
     <div class="table-wrapper">
-
       <table>
-
         <thead>
           <tr>
             <th>Metric</th>
@@ -603,7 +543,6 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
         </thead>
 
         <tbody>
-
           <tr>
             <td>ROC-AUC</td>
             <td>0.504</td>
@@ -627,11 +566,8 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
             <td>0.546</td>
             <td class="better">0.840</td>
           </tr>
-
         </tbody>
-
       </table>
-
     </div>
 
     <p>
@@ -654,9 +590,7 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
       accuracy.
     </p>
 
-    <!-- ROC -->
     <div class="chart">
-
       <img
         src="paper_artifacts/roc_curve.png"
         alt="ROC curve comparing Random Forest and Logistic Regression"
@@ -666,12 +600,9 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
         Figure 1. ROC curve comparing the Random Forest model with the
         Logistic Regression baseline.
       </p>
-
     </div>
 
-    <!-- Precision -->
     <div class="chart">
-
       <img
         src="paper_artifacts/precision_at_k.png"
         alt="Precision at K comparison between Random Forest and Logistic Regression"
@@ -680,22 +611,16 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
       <p class="chart-caption">
         Figure 2. Precision@K for the highest-ranked content items.
       </p>
-
     </div>
-
   </section>
 
-  <!-- 5 -->
   <section>
-
-    <h2>5. Interpretation & Limitations</h2>
+    <h2>5. Interpretation &amp; Limitations</h2>
 
     <h3>Feature Importance</h3>
 
     <div class="table-wrapper">
-
       <table>
-
         <thead>
           <tr>
             <th>Feature</th>
@@ -704,7 +629,6 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
         </thead>
 
         <tbody>
-
           <tr>
             <td>Rare-query impression share</td>
             <td>0.236</td>
@@ -729,11 +653,8 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
             <td>Visible query count</td>
             <td>0.117</td>
           </tr>
-
         </tbody>
-
       </table>
-
     </div>
 
     <p>
@@ -745,7 +666,6 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     <h3>Limitations</h3>
 
     <ul>
-
       <li>
         The client-level holdout provides a stronger test of generalization
         but also makes the prediction problem more difficult.
@@ -764,8 +684,8 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
 
       <li>
         The available features do not capture every factor that can affect
-        search performance, including changes in search intent,
-        competition, and search-engine behavior.
+        search performance, including changes in search intent, competition,
+        and search-engine behavior.
       </li>
 
       <li>
@@ -777,7 +697,6 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
         Results from this experiment may not generalize equally to future
         datasets or clients.
       </li>
-
     </ul>
 
     <p>
@@ -786,12 +705,9 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
       A human reviewer should make the final decision about whether a
       page actually needs to be changed.
     </p>
-
   </section>
 
-  <!-- 6 -->
   <section>
-
     <h2>6. Ranked Recommendations</h2>
 
     <h3>1. Start with the highest-ranked pages</h3>
@@ -838,12 +754,9 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     <div class="workflow">
       Model ranking → Human review → Content decision → Refresh/test → Monitor
     </div>
-
   </section>
 
-  <!-- 7 -->
   <section>
-
     <h2>7. Reproducibility</h2>
 
     <p>
@@ -852,31 +765,12 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     </p>
 
     <ul>
-
-      <li>
-        <strong>Primary model:</strong> Random Forest Classifier
-      </li>
-
-      <li>
-        <strong>Trees:</strong> 200
-      </li>
-
-      <li>
-        <strong>Random seed:</strong> 42
-      </li>
-
-      <li>
-        <strong>Baseline:</strong> Logistic Regression
-      </li>
-
-      <li>
-        <strong>Validation:</strong> Client-level GroupShuffleSplit
-      </li>
-
-      <li>
-        <strong>Test set:</strong> 51,702 rows from 13 clients
-      </li>
-
+      <li><strong>Primary model:</strong> Random Forest Classifier</li>
+      <li><strong>Trees:</strong> 200</li>
+      <li><strong>Random seed:</strong> 42</li>
+      <li><strong>Baseline:</strong> Logistic Regression</li>
+      <li><strong>Validation:</strong> Client-level GroupShuffleSplit</li>
+      <li><strong>Test set:</strong> 51,702 rows from 13 clients</li>
     </ul>
 
     <p>
@@ -886,7 +780,6 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
     </p>
 
     <div class="links">
-
       <a
         class="button"
         href="https://github.com/farankhandev/flyrank-ml-internship"
@@ -895,15 +788,11 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
       >
         View Source Repository
       </a>
-
     </div>
-
   </section>
 
-  <!-- 8 -->
   <section>
-
-    <h2>8. Acknowledgments & Data Credit</h2>
+    <h2>8. Acknowledgments &amp; Data Credit</h2>
 
     <p>
       Built on the
@@ -921,9 +810,7 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
       domains, URLs, search queries, and other private identifying
       information.
     </p>
-
   </section>
-
 </div>
 ```
 
@@ -932,6 +819,5 @@ content="machine learning, content performance, SEO, Random Forest, Logistic Reg
   <footer>
     © 2026 Faran Khan · Machine Learning Research Project
   </footer>
-
 </body>
 </html>
