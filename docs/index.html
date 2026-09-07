@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -301,528 +300,616 @@
       }
     }
   </style>
-
 </head>
 
 <body>
+
   <header class="hero">
     <div class="container">
+
       <h1>Machine Learning for Prioritizing Declining Content</h1>
 
-  <p class="hero-intro">
-    A practical machine learning study exploring whether content showing
-    declining search performance can be ranked for human review.
-  </p>
+      <p class="hero-intro">
+        A practical machine learning study exploring whether content showing
+        signs of declining search performance can be prioritized for human review.
+      </p>
 
-  <p class="author">
-    <strong>Faran Khan</strong> · Machine Learning · FlyRank ML Internship · 2026
-  </p>
-</div>
+      <p class="author">
+        <strong>Faran Khan</strong> · Machine Learning · FlyRank ML Internship · 2026
+      </p>
 
-
+    </div>
   </header>
 
   <main>
     <div class="container">
-<section class="abstract">
-  <h2>Abstract</h2>
 
-  <p>
-    This project explores a practical content-review problem: when a team has
-    many pages to monitor, how can it identify which content items should be
-    reviewed first when search performance starts to decline? Using the
-    FlyRank internship dataset, I tested whether historical search-performance
-    and query-level signals could be used to rank content showing signs of
-    decline. I trained a Random Forest classifier and compared it with a
-    Logistic Regression baseline using a client-level holdout split. The
-    Random Forest achieved a ROC-AUC of 0.604, compared with 0.504 for the
-    baseline, and reached 0.880 Precision@50. These results suggest that
-    machine learning may help narrow a large content-review workload to a
-    smaller group of higher-priority items. However, the experiment does not
-    show that changing a page will improve its future search performance, so
-    the model should be treated as a decision-support tool rather than an
-    automatic content decision system.
-  </p>
-</section>
+      <section class="abstract">
+        <h2>Abstract</h2>
 
-<section>
-  <h2>1. Problem</h2>
+        <p>
+          This project looks at a practical content-review problem: when a team
+          has many pages to monitor, how can it decide which ones deserve
+          attention first when search performance starts to decline? Using the
+          FlyRank internship dataset, I tested whether historical
+          search-performance and query-level signals could be used to rank
+          content showing signs of decline.
+        </p>
 
-  <h3>Research Question</h3>
+        <p>
+          I trained a Random Forest classifier and compared it with a Logistic
+          Regression baseline using a client-level holdout split. The Random
+          Forest achieved a ROC-AUC of 0.604, compared with 0.504 for the
+          baseline, and reached 0.880 Precision@50.
+        </p>
 
-  <p>
-    Can machine learning help prioritize content items that show signs of
-    declining search performance?
-  </p>
+        <p>
+          The results suggest that machine learning may help narrow a large
+          content-review workload to a smaller group of higher-priority items.
+          However, the experiment does not show that changing a page will
+          improve its future search performance. The model is therefore best
+          treated as a decision-support tool that helps organize human review,
+          rather than as an automated content decision system.
+        </p>
+      </section>
 
-  <p>
-    This question comes from a practical content-management problem. A team
-    responsible for a large set of pages may not have enough time or resources
-    to review every page whenever search performance changes. The challenge is
-    therefore not simply to identify declining content, but to determine which
-    items deserve human attention first.
-  </p>
+      <section>
+        <h2>1. Problem</h2>
 
-  <p>
-    In this project, I use the FlyRank internship dataset as a case study for
-    that prioritization problem. The experiment tests whether available
-    historical search-performance and query-level signals can produce a useful
-    ranking of content items showing signs of decline. The goal is to support
-    human review by making the initial list of pages more focused and
-    manageable.
-  </p>
+        <div class="note">
+          <strong>Case study framing:</strong>
+          This paper uses the FlyRank content dataset to examine a practical
+          prioritization problem: when search performance changes across a
+          large collection of pages, a team may need a way to decide where
+          human review should begin. The machine learning system tested here
+          is intended to help with that first step by ranking items that show
+          signs of decline.
+        </div>
 
-  <p>
-    The model is intended as a decision-support system. It is not intended to
-    make automatic content decisions or claim that a particular change will
-    improve rankings or traffic.
-  </p>
-</section>
+        <h3>Research Question</h3>
 
-  <section>
-    <h2>2. Data</h2>
+        <p>
+          Can machine learning help prioritize content items that show signs
+          of declining search performance?
+        </p>
 
-    <h3>Data Source</h3>
+        <p>
+          This question comes from a common content-management challenge. A
+          team may be responsible for a large number of pages while having
+          limited time to investigate every change in search performance.
+          In that situation, the problem is not simply identifying declining
+          content. It is deciding which items deserve human attention first.
+        </p>
 
-    <p>
-      The analysis uses the
-      <strong>FlyRank internship warehouse full release</strong>
-      hosted on Hugging Face.
-    </p>
+        <p>
+          I use the FlyRank internship dataset as a case study for this
+          prioritization problem. The experiment tests whether the historical
+          search-performance and query-level signals available in the dataset
+          can produce a useful ranking of content items showing signs of
+          decline.
+        </p>
 
-    <p>The main tables used were:</p>
+        <p>
+          The intended workflow is straightforward: use the model to narrow
+          the initial review list, investigate the highest-ranked items, and
+          let a human reviewer decide whether any content actually needs to
+          be changed.
+        </p>
 
-    <ul>
-      <li><code>dim_clients</code> : client-level metadata and available history dates.</li>
-      <li><code>dim_content</code> : content-level metadata.</li>
-      <li><code>fact_content_daily_performance</code> : daily Google Search Console performance data.</li>
-      <li><code>fact_content_query_90d</code> : content and query-level signals aggregated over the available 90-day window.</li>
-    </ul>
+        <p>
+          The model is intended as decision support. It is not intended to
+          make automatic content decisions or claim that a particular change
+          will improve rankings or traffic.
+        </p>
+      </section>
 
-    <h3>Modeling Window</h3>
+      <section>
+        <h2>2. Data</h2>
 
-    <p>
-      I used a 60-day performance window divided into two 30-day periods.
-      The previous 30 days provided historical signals, while the latest
-      30 days were used to define the observed decline.
-    </p>
+        <h3>Data Source</h3>
 
-    <p>
-      A content item needed at least 100 impressions in the previous
-      30-day period to be included in the comparison.
-    </p>
+        <p>
+          The analysis uses the
+          <strong>FlyRank internship warehouse full release</strong>
+          hosted on Hugging Face. I use the dataset here as a public-safe
+          case study of the content-prioritization problem described above.
+        </p>
 
-    <p>
-      This produced <strong>111,247</strong> content items with sufficient
-      performance history. After removing rows with missing values in the
-      selected features, <strong>102,203</strong> items remained for
-      modeling.
-    </p>
+        <p>The main tables used were:</p>
 
-    <div class="note">
-      No client names, domains, URLs, search queries, or other private
-      identifying information are included in this public analysis.
+        <ul>
+          <li>
+            <code>dim_clients</code> : client-level metadata and available
+            history dates.
+          </li>
+          <li>
+            <code>dim_content</code> : content-level metadata.
+          </li>
+          <li>
+            <code>fact_content_daily_performance</code> : daily Google Search
+            Console performance data.
+          </li>
+          <li>
+            <code>fact_content_query_90d</code> : content and query-level
+            signals aggregated over the available 90-day window.
+          </li>
+        </ul>
+
+        <h3>Modeling Window</h3>
+
+        <p>
+          I used a 60-day performance window divided into two 30-day periods.
+          The previous 30 days provided the historical context, while the
+          latest 30 days were used to define the observed decline.
+        </p>
+
+        <p>
+          A content item needed at least 100 impressions in the previous
+          30-day period to be included in the comparison.
+        </p>
+
+        <p>
+          This produced <strong>111,247</strong> content items with sufficient
+          performance history. After removing rows with missing values in the
+          selected features, <strong>102,203</strong> items remained for
+          modeling.
+        </p>
+
+        <div class="note">
+          No client names, domains, URLs, search queries, or other private
+          identifying information are included in this public analysis.
+        </div>
+      </section>
+
+      <section>
+        <h2>3. Methodology</h2>
+
+        <h3>Defining Declining Content</h3>
+
+        <p>
+          A content item was labeled as declining when its impressions during
+          the latest 30-day period were less than 80% of its impressions
+          during the previous 30-day period. This corresponds to an observed
+          decline of more than 20%.
+        </p>
+
+        <h3>Features</h3>
+
+        <p>
+          The model used five available signals:
+        </p>
+
+        <ul>
+          <li>Previous 30-day impressions (<code>imp_prev30</code>)</li>
+          <li>Visible query count (<code>visible_queries</code>)</li>
+          <li>Rare-query impression share (<code>rare_share</code>)</li>
+          <li>Anonymized-query impression share (<code>anon_share</code>)</li>
+          <li>Top-query impression share (<code>top_query_share</code>)</li>
+        </ul>
+
+        <h3>Models</h3>
+
+        <p>
+          The main model was a <strong>Random Forest Classifier</strong> with
+          200 trees and a fixed random seed of 42. I used it to test whether
+          the available signals could support a useful ranking of content
+          items rather than relying only on a simple binary decision.
+        </p>
+
+        <p>
+          I used <strong>Logistic Regression</strong> as the baseline. Both
+          models were trained using the same features and evaluated on the
+          same test split.
+        </p>
+
+        <h3>Validation</h3>
+
+        <p>
+          I used <code>GroupShuffleSplit</code> to create a client-level
+          holdout. Approximately 75% of the modeling data was used for
+          training and 25% for testing, while keeping clients separated
+          between the two sets.
+        </p>
+
+        <p>
+          The final test set contained
+          <strong>51,702 rows from 13 clients</strong>.
+        </p>
+
+        <h3>Evaluation</h3>
+
+        <p>
+          Because the practical goal is prioritization, I looked at both the
+          model's overall ability to distinguish declining items and the
+          quality of its highest-ranked predictions. This matters because a
+          reviewer may only have time to investigate a small number of items
+          at the top of a review queue.
+        </p>
+
+        <ul>
+          <li>ROC-AUC</li>
+          <li>Precision@50</li>
+          <li>Precision@100</li>
+          <li>Precision@500</li>
+        </ul>
+
+        <h3>Leakage Consideration</h3>
+
+        <p>
+          The decline label was calculated from the latest 30-day impressions
+          compared with the previous 30-day impressions.
+        </p>
+
+        <p>
+          One important limitation is that the query-level signals came from
+          the available 90-day query table. Because that period can overlap
+          with the outcome period, some of these features may contain
+          information from the same period used to define the outcome.
+        </p>
+
+        <p>
+          For that reason, I treat these results as an experiment in
+          prioritization rather than a production-ready forecasting system.
+        </p>
+      </section>
+
+      <section>
+        <h2>4. Results</h2>
+
+        <div class="metrics">
+
+          <div class="metric">
+            <strong>0.604</strong>
+            <span>Random Forest ROC-AUC</span>
+          </div>
+
+          <div class="metric">
+            <strong>0.504</strong>
+            <span>Logistic Regression ROC-AUC</span>
+          </div>
+
+          <div class="metric">
+            <strong>0.880</strong>
+            <span>Random Forest Precision@50</span>
+          </div>
+
+          <div class="metric">
+            <strong>63.3%</strong>
+            <span>Declining Base Rate</span>
+          </div>
+
+        </div>
+
+        <h3>Model vs Baseline</h3>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Logistic Regression</th>
+                <th>Random Forest</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>ROC-AUC</td>
+                <td>0.504</td>
+                <td class="better">0.604</td>
+              </tr>
+
+              <tr>
+                <td>Precision@50</td>
+                <td>0.460</td>
+                <td class="better">0.880</td>
+              </tr>
+
+              <tr>
+                <td>Precision@100</td>
+                <td>0.550</td>
+                <td class="better">0.870</td>
+              </tr>
+
+              <tr>
+                <td>Precision@500</td>
+                <td>0.546</td>
+                <td class="better">0.840</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          The Random Forest produced a ROC-AUC of <strong>0.604</strong>,
+          compared with <strong>0.504</strong> for Logistic Regression.
+          This gives the Random Forest a measurable advantage over the
+          baseline on the client-level test split, although the overall
+          discrimination remains modest.
+        </p>
+
+        <p>
+          The difference was more noticeable at the top of the ranking.
+          Among the 50 highest-ranked items, the Random Forest reached
+          <strong>0.880 Precision@50</strong>, meaning that 88% of those
+          items were labeled as declining in the test set.
+        </p>
+
+        <p>
+          For a review workflow, this ranking result is more directly relevant
+          than accuracy across the entire dataset because the practical
+          question is which items should be investigated first.
+        </p>
+
+        <p>
+          Overall classification accuracy tells a different story. The
+          Random Forest achieved 61.3% accuracy compared with 65.8% for the
+          Logistic Regression baseline. That result is worth keeping in view:
+          the Random Forest was better on the ranking-oriented measures used
+          for this case study, but it was not better on every possible
+          classification metric.
+        </p>
+
+        <p>
+          The goal of this experiment is therefore not to claim that the
+          Random Forest is simply a better classifier. The more specific
+          finding is that it produced a stronger ranking signal for the
+          highest-priority review items on this test split.
+        </p>
+
+        <div class="chart">
+          <img
+            src="paper_artifacts/roc_curve.png"
+            alt="ROC curve comparing Random Forest and Logistic Regression"
+          >
+
+          <p class="chart-caption">
+            Figure 1. ROC curve comparing the Random Forest model with the
+            Logistic Regression baseline.
+          </p>
+        </div>
+
+        <div class="chart">
+          <img
+            src="paper_artifacts/precision_at_k.png"
+            alt="Precision at K comparison between Random Forest and Logistic Regression"
+          >
+
+          <p class="chart-caption">
+            Figure 2. Precision@K for the highest-ranked content items.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2>5. Interpretation &amp; Limitations</h2>
+
+        <h3>Feature Importance</h3>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Importance</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Rare-query impression share</td>
+                <td>0.236</td>
+              </tr>
+
+              <tr>
+                <td>Anonymized-query impression share</td>
+                <td>0.233</td>
+              </tr>
+
+              <tr>
+                <td>Previous 30-day impressions</td>
+                <td>0.222</td>
+              </tr>
+
+              <tr>
+                <td>Top-query impression share</td>
+                <td>0.192</td>
+              </tr>
+
+              <tr>
+                <td>Visible query count</td>
+                <td>0.117</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          The feature importance values provide a directional view of which
+          signals contributed most to the Random Forest's decisions. They
+          are useful for understanding the model, but they should not be
+          interpreted as evidence that any individual signal causes search
+          performance to decline.
+        </p>
+
+        <h3>Limitations</h3>
+
+        <ul>
+          <li>
+            The client-level holdout provides a stronger test of generalization
+            but also makes the prediction problem more difficult.
+          </li>
+
+          <li>
+            The model predicts the defined declining-impressions label. It
+            does not show that a content refresh will cause performance to
+            improve.
+          </li>
+
+          <li>
+            The dataset is anonymized, so the results should not be interpreted
+            as evidence about a particular company or website.
+          </li>
+
+          <li>
+            The available features do not capture every factor that can affect
+            search performance, including changes in search intent, competition,
+            and search-engine behavior.
+          </li>
+
+          <li>
+            The 90-day query data may overlap with the outcome period, creating
+            a potential temporal leakage concern.
+          </li>
+
+          <li>
+            Results from this experiment may not generalize equally to future
+            datasets or clients.
+          </li>
+        </ul>
+
+        <p>
+          Overall, the model should be treated as a
+          <strong>decision-support and prioritization tool</strong>.
+          A human reviewer should make the final decision about whether a
+          page actually needs to be changed.
+        </p>
+      </section>
+
+      <section>
+        <h2>6. Ranked Recommendations</h2>
+
+        <h3>1. Start with the highest-ranked pages</h3>
+
+        <p>
+          When review capacity is limited, start with the pages at the top of
+          the model's ranking. The Precision@50 result suggests that this
+          smaller group contains a high concentration of content labeled as
+          declining, making it a reasonable starting point for human
+          investigation.
+        </p>
+
+        <h3>2. Look at the underlying search signals</h3>
+
+        <p>
+          A model score should be treated as a starting point, not a final
+          diagnosis. Review the historical impressions and available
+          query-level signals before deciding whether a page actually needs
+          attention.
+        </p>
+
+        <h3>3. Review the content itself</h3>
+
+        <p>
+          Before making a change, a human reviewer should consider search
+          intent, content quality, freshness, competition, and whether the
+          page still answers the user's needs. The model cannot replace that
+          context.
+        </p>
+
+        <h3>4. Use the ranking when resources are limited</h3>
+
+        <p>
+          Teams do not always have enough time to review every page. A ranked
+          list can make that constraint easier to manage by directing limited
+          review capacity toward a smaller set of higher-priority items.
+        </p>
+
+        <h3>5. Measure what happens after changes</h3>
+
+        <p>
+          If a page is refreshed, its search performance should be monitored
+          afterward. That feedback is important because the model identifies
+          items for review; it does not establish that a particular refresh
+          will succeed.
+        </p>
+
+        <div class="workflow">
+          Model ranking → Human review → Content decision → Refresh/test → Monitor
+        </div>
+      </section>
+
+      <section>
+        <h2>7. Reproducibility</h2>
+
+        <p>
+          The project repository contains the notebooks, scripts,
+          documentation, and analysis artifacts used for this work. The goal
+          is to make the analysis reproducible without exposing private
+          client information.
+        </p>
+
+        <ul>
+          <li>
+            <strong>Primary model:</strong> Random Forest Classifier
+          </li>
+
+          <li>
+            <strong>Trees:</strong> 200
+          </li>
+
+          <li>
+            <strong>Random seed:</strong> 42
+          </li>
+
+          <li>
+            <strong>Baseline:</strong> Logistic Regression
+          </li>
+
+          <li>
+            <strong>Validation:</strong> Client-level GroupShuffleSplit
+          </li>
+
+          <li>
+            <strong>Test set:</strong> 51,702 rows from 13 clients
+          </li>
+        </ul>
+
+        <p>
+          Credentials and private datasets are not committed to the
+          repository. Runtime credentials are supplied separately when
+          required by the notebook.
+        </p>
+
+        <div class="links">
+          <a
+            class="button"
+            href="https://github.com/farankhandev/flyrank-ml-internship"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View Source Repository
+          </a>
+        </div>
+      </section>
+
+      <section>
+        <h2>8. Acknowledgments &amp; Data Credit</h2>
+
+        <p>
+          This study was built on the
+          <a
+            href="https://flyrank.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            FlyRank ML Internship dataset
+          </a>.
+        </p>
+
+        <p>
+          This public-facing paper intentionally excludes client names,
+          domains, URLs, search queries, and other private identifying
+          information.
+        </p>
+      </section>
+
     </div>
-  </section>
-
-  <section>
-    <h2>3. Methodology</h2>
-
-    <h3>Defining Declining Content</h3>
-
-    <p>
-      A content item was labeled as declining when its impressions during
-      the latest 30-day period were less than 80% of its impressions during
-      the previous 30-day period. In other words, the observed decline was
-      greater than 20%.
-    </p>
-
-    <h3>Features</h3>
-
-    <p>The model used five available signals:</p>
-
-    <ul>
-      <li>Previous 30-day impressions (<code>imp_prev30</code>)</li>
-      <li>Visible query count (<code>visible_queries</code>)</li>
-      <li>Rare-query impression share (<code>rare_share</code>)</li>
-      <li>Anonymized-query impression share (<code>anon_share</code>)</li>
-      <li>Top-query impression share (<code>top_query_share</code>)</li>
-    </ul>
-
-    <h3>Models</h3>
-
-    <p>
-      The main model was a <strong>Random Forest Classifier</strong> with
-      200 trees and a fixed random seed of 42.
-    </p>
-
-    <p>
-      I used <strong>Logistic Regression</strong> as the baseline. Both
-      models were trained using the same features and evaluated on the
-      same test split.
-    </p>
-
-    <h3>Validation</h3>
-
-    <p>
-      I used <code>GroupShuffleSplit</code> to create a client-level
-      holdout. Approximately 75% of the modeling data was used for
-      training and 25% for testing, while keeping clients separated
-      between the two sets.
-    </p>
-
-    <p>
-      The final test set contained <strong>51,702 rows from 13 clients</strong>.
-    </p>
-
-    <h3>Evaluation</h3>
-
-    <p>
-      Since the practical goal is to decide which content deserves human
-      attention first, I focused on both overall discrimination and the
-      quality of the highest-ranked predictions.
-    </p>
-
-    <ul>
-      <li>ROC-AUC</li>
-      <li>Precision@50</li>
-      <li>Precision@100</li>
-      <li>Precision@500</li>
-    </ul>
-
-    <h3>Leakage Consideration</h3>
-
-    <p>
-      The decline label was calculated from the latest 30-day impressions
-      compared with the previous 30-day impressions.
-    </p>
-
-    <p>
-      One important limitation is that the query-level signals came from
-      the available 90-day query table. Because that period can overlap
-      with the outcome period, some of these features may contain
-      information from the same period used to define the outcome.
-    </p>
-
-    <p>
-      For that reason, I treat these results as an experiment in
-      prioritization rather than a production-ready forecasting system.
-    </p>
-  </section>
-
-  <section>
-    <h2>4. Results</h2>
-
-    <div class="metrics">
-      <div class="metric">
-        <strong>0.604</strong>
-        <span>Random Forest ROC-AUC</span>
-      </div>
-
-      <div class="metric">
-        <strong>0.504</strong>
-        <span>Logistic Regression ROC-AUC</span>
-      </div>
-
-      <div class="metric">
-        <strong>0.880</strong>
-        <span>Random Forest Precision@50</span>
-      </div>
-
-      <div class="metric">
-        <strong>63.3%</strong>
-        <span>Declining Base Rate</span>
-      </div>
-    </div>
-
-    <h3>Model vs Baseline</h3>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Metric</th>
-            <th>Logistic Regression</th>
-            <th>Random Forest</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr>
-            <td>ROC-AUC</td>
-            <td>0.504</td>
-            <td class="better">0.604</td>
-          </tr>
-
-          <tr>
-            <td>Precision@50</td>
-            <td>0.460</td>
-            <td class="better">0.880</td>
-          </tr>
-
-          <tr>
-            <td>Precision@100</td>
-            <td>0.550</td>
-            <td class="better">0.870</td>
-          </tr>
-
-          <tr>
-            <td>Precision@500</td>
-            <td>0.546</td>
-            <td class="better">0.840</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p>
-      The Random Forest produced a ROC-AUC of <strong>0.604</strong>,
-      compared with <strong>0.504</strong> for Logistic Regression.
-    </p>
-
-    <p>
-      The difference was more noticeable among the highest-ranked
-      predictions. At the top 50 items, the Random Forest reached
-      <strong>0.880 Precision@50</strong>, meaning that 88% of those
-      items were labeled as declining in the test set.
-    </p>
-
-    <p>
-      Overall classification accuracy tells a different story. The
-      Random Forest achieved 61.3% accuracy compared with 65.8% for the
-      Logistic Regression baseline. This is important because the purpose
-      of this experiment is ranking, not simply maximizing classification
-      accuracy.
-    </p>
-
-    <div class="chart">
-      <img
-        src="paper_artifacts/roc_curve.png"
-        alt="ROC curve comparing Random Forest and Logistic Regression"
-      >
-
-      <p class="chart-caption">
-        Figure 1. ROC curve comparing the Random Forest model with the
-        Logistic Regression baseline.
-      </p>
-    </div>
-
-    <div class="chart">
-      <img
-        src="paper_artifacts/precision_at_k.png"
-        alt="Precision at K comparison between Random Forest and Logistic Regression"
-      >
-
-      <p class="chart-caption">
-        Figure 2. Precision@K for the highest-ranked content items.
-      </p>
-    </div>
-  </section>
-
-  <section>
-    <h2>5. Interpretation &amp; Limitations</h2>
-
-    <h3>Feature Importance</h3>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Feature</th>
-            <th>Importance</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr>
-            <td>Rare-query impression share</td>
-            <td>0.236</td>
-          </tr>
-
-          <tr>
-            <td>Anonymized-query impression share</td>
-            <td>0.233</td>
-          </tr>
-
-          <tr>
-            <td>Previous 30-day impressions</td>
-            <td>0.222</td>
-          </tr>
-
-          <tr>
-            <td>Top-query impression share</td>
-            <td>0.192</td>
-          </tr>
-
-          <tr>
-            <td>Visible query count</td>
-            <td>0.117</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p>
-      The feature importance values give a directional view of which
-      signals contributed most to the Random Forest's decisions. They
-      should not be interpreted as causal effects.
-    </p>
-
-    <h3>Limitations</h3>
-
-    <ul>
-      <li>
-        The client-level holdout provides a stronger test of generalization
-        but also makes the prediction problem more difficult.
-      </li>
-
-      <li>
-        The model predicts the defined declining-impressions label. It
-        does not show that a content refresh will cause performance to
-        improve.
-      </li>
-
-      <li>
-        The dataset is anonymized, so the results should not be interpreted
-        as evidence about a particular company or website.
-      </li>
-
-      <li>
-        The available features do not capture every factor that can affect
-        search performance, including changes in search intent, competition,
-        and search-engine behavior.
-      </li>
-
-      <li>
-        The 90-day query data may overlap with the outcome period, creating
-        a potential temporal leakage concern.
-      </li>
-
-      <li>
-        Results from this experiment may not generalize equally to future
-        datasets or clients.
-      </li>
-    </ul>
-
-    <p>
-      Overall, the model should be treated as a
-      <strong>decision-support and prioritization tool</strong>.
-      A human reviewer should make the final decision about whether a
-      page actually needs to be changed.
-    </p>
-  </section>
-
-  <section>
-    <h2>6. Ranked Recommendations</h2>
-
-    <h3>1. Start with the highest-ranked pages</h3>
-
-    <p>
-      When review capacity is limited, begin with the pages at the top of
-      the model's ranking. The Precision@50 result suggests that this
-      smaller group contains a high concentration of content labeled as
-      declining.
-    </p>
-
-    <h3>2. Look at the underlying search signals</h3>
-
-    <p>
-      A model score should be a starting point for investigation. Review
-      historical impressions and available query-level signals before
-      deciding whether a page needs attention.
-    </p>
-
-    <h3>3. Review the content itself</h3>
-
-    <p>
-      Before making a change, a human reviewer should consider search
-      intent, content quality, freshness, competition, and whether the
-      page still answers the user's needs.
-    </p>
-
-    <h3>4. Use the ranking when resources are limited</h3>
-
-    <p>
-      Teams do not always have enough time to review every page. A ranked
-      list can help direct limited review capacity toward a smaller set of
-      higher-priority items.
-    </p>
-
-    <h3>5. Measure what happens after changes</h3>
-
-    <p>
-      If a page is refreshed, its search performance should be monitored
-      afterward. The model should not be treated as evidence that a
-      particular refresh will succeed.
-    </p>
-
-    <div class="workflow">
-      Model ranking → Human review → Content decision → Refresh/test → Monitor
-    </div>
-  </section>
-
-  <section>
-    <h2>7. Reproducibility</h2>
-
-    <p>
-      The project repository contains the notebooks, scripts,
-      documentation, and analysis artifacts used for this work.
-    </p>
-
-    <ul>
-      <li><strong>Primary model:</strong> Random Forest Classifier</li>
-      <li><strong>Trees:</strong> 200</li>
-      <li><strong>Random seed:</strong> 42</li>
-      <li><strong>Baseline:</strong> Logistic Regression</li>
-      <li><strong>Validation:</strong> Client-level GroupShuffleSplit</li>
-      <li><strong>Test set:</strong> 51,702 rows from 13 clients</li>
-    </ul>
-
-    <p>
-      Credentials and private datasets are not committed to the
-      repository. Runtime credentials are supplied separately when
-      required by the notebook.
-    </p>
-
-    <div class="links">
-      <a
-        class="button"
-        href="https://github.com/farankhandev/flyrank-ml-internship"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        View Source Repository
-      </a>
-    </div>
-  </section>
-
-  <section>
-    <h2>8. Acknowledgments &amp; Data Credit</h2>
-
-    <p>
-      Built on the
-      <a
-        href="https://flyrank.ai"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        FlyRank ML Internship dataset
-      </a>.
-    </p>
-
-    <p>
-      This public-facing paper intentionally excludes client names,
-      domains, URLs, search queries, and other private identifying
-      information.
-    </p>
-  </section>
-
-</div>
-
   </main>
 
   <footer>
     © 2026 Faran Khan · Machine Learning Research Project
   </footer>
+
 </body>
 </html>
