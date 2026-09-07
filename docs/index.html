@@ -324,49 +324,60 @@
 
   <main>
     <div class="container">
+<section class="abstract">
+  <h2>Abstract</h2>
 
+  <p>
+    This project explores a practical content-review problem: when a team has
+    many pages to monitor, how can it identify which content items should be
+    reviewed first when search performance starts to decline? Using the
+    FlyRank internship dataset, I tested whether historical search-performance
+    and query-level signals could be used to rank content showing signs of
+    decline. I trained a Random Forest classifier and compared it with a
+    Logistic Regression baseline using a client-level holdout split. The
+    Random Forest achieved a ROC-AUC of 0.604, compared with 0.504 for the
+    baseline, and reached 0.880 Precision@50. These results suggest that
+    machine learning may help narrow a large content-review workload to a
+    smaller group of higher-priority items. However, the experiment does not
+    show that changing a page will improve its future search performance, so
+    the model should be treated as a decision-support tool rather than an
+    automatic content decision system.
+  </p>
+</section>
 
-  <section class="abstract">
-    <h2>Abstract</h2>
+<section>
+  <h2>1. Problem</h2>
 
-    <p>
-      This project asks whether machine learning can help identify content
-      items whose search performance is declining. I used historical
-      impressions and query-level signals from the FlyRank internship
-      warehouse and trained a Random Forest classifier to rank potentially
-      declining content. I compared its performance with a Logistic
-      Regression baseline using a client-level holdout split. The Random
-      Forest achieved a ROC-AUC of 0.604, compared with 0.504 for the
-      baseline, and reached 0.880 Precision@50. The results indicate that
-      the model may be useful for deciding which pages should be reviewed
-      first, but they do not show that changing a page will improve its
-      future search performance.
-    </p>
-  </section>
+  <h3>Research Question</h3>
 
-  <section>
-    <h2>1. Problem</h2>
+  <p>
+    Can machine learning help prioritize content items that show signs of
+    declining search performance?
+  </p>
 
-    <h3>Research Question</h3>
+  <p>
+    This question comes from a practical content-management problem. A team
+    responsible for a large set of pages may not have enough time or resources
+    to review every page whenever search performance changes. The challenge is
+    therefore not simply to identify declining content, but to determine which
+    items deserve human attention first.
+  </p>
 
-    <p>
-      Can machine learning help prioritize content items that show signs
-      of declining search performance?
-    </p>
+  <p>
+    In this project, I use the FlyRank internship dataset as a case study for
+    that prioritization problem. The experiment tests whether available
+    historical search-performance and query-level signals can produce a useful
+    ranking of content items showing signs of decline. The goal is to support
+    human review by making the initial list of pages more focused and
+    manageable.
+  </p>
 
-    <p>
-      In practice, a team may have many pages to review but limited time
-      and resources. The purpose of this experiment is to see whether a
-      model can produce a useful ranking so that human reviewers can start
-      with the pages most likely to need attention.
-    </p>
-
-    <p>
-      The model is intended as a decision-support system. It is not
-      intended to make automatic content decisions or claim that a
-      particular change will improve rankings or traffic.
-    </p>
-  </section>
+  <p>
+    The model is intended as a decision-support system. It is not intended to
+    make automatic content decisions or claim that a particular change will
+    improve rankings or traffic.
+  </p>
+</section>
 
   <section>
     <h2>2. Data</h2>
