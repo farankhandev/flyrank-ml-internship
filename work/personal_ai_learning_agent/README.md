@@ -60,6 +60,8 @@ This kept the MVP small and allowed me to test the core workflow before adding m
                      Human learning /
                      career decision
 
+
+
 ## Connected data
 
 The first version uses one real project document as its connected source:
