@@ -30,7 +30,9 @@ The first version was built using **Claude Project** rather than developing a se
 
 This kept the MVP small and allowed me to test the core workflow before adding more integrations.
 
-#Architecture
+
+## Architecture
+
                     USER
                       │
                       ▼
