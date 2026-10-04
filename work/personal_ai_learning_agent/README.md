@@ -32,33 +32,33 @@ This kept the MVP small and allowed me to test the core workflow before adding m
 
 ### Architecture
 
-                    ┌─────────────────────────┐
-                    │   Personal AI Learning   │
-                    │    & Career Assistant    │
-                    └────────────┬────────────┘
-                                 │
-                    ┌────────────▼────────────┐
-                    │      Claude Project      │
-                    │   Agent instructions +  │
-                    │       reasoning          │
-                    └────────────┬────────────┘
-                                 │
-                    ┌────────────▼────────────┐
-                    │   Connected project     │
-                    │        material         │
-                    │                         │
-                    │  ML Project README      │
-                    └────────────┬────────────┘
-                                 │
-             ┌───────────────────┼──────────────────┐
-             │                   │                  │
-             ▼                   ▼                  ▼
-       Find gaps          Recommend learning    Generate practice
-             │                   │                  │
-             └───────────────────┼──────────────────┘
-                                 ▼
-                         Human learning /
-                         career decision
+                ┌─────────────────────────┐
+                │   Personal AI Learning  │
+                │    & Career Assistant   │
+                └────────────┬────────────┘
+                             │
+                ┌────────────▼────────────┐
+                │      Claude Project     │
+                │   Agent instructions +  │
+                │       reasoning         │
+                └────────────┬────────────┘
+                             │
+                ┌────────────▼────────────┐
+                │   Connected project     │
+                │        material         │
+                │                         │
+                │  ML Project README      │
+                └────────────┬────────────┘
+                             │
+         ┌───────────────────┼──────────────────┐
+         │                   │                  │
+         ▼                   ▼                  ▼
+   Find gaps          Recommend learning    Generate practice
+         │                   │                  │
+         └───────────────────┼──────────────────┘
+                             ▼
+                     Human learning /
+                     career decision
 
 ## Connected data
 
@@ -89,7 +89,10 @@ I deliberately started with one real project file instead of connecting everythi
 
 ### Example prompts
 
+
 Review my project material and identify one important learning gap.
+
+
 
 What should I study next based on the weaknesses you found?
 
@@ -97,13 +100,16 @@ Generate interview questions based on the areas I need to improve.
 
 Connect the machine learning concepts in my project to the workflow described in the README.
 
+
+
 What information is missing from my project material?
+
 
 Can you determine the exact test-set R² from the available README? If not, explain why.
 
 ## Evaluation and testing
 
-I tested the first version using six cases based on the FL-06 agent specification:
+I tested the first version using six practical cases:
 
 1. Identify a learning gap
 2. Recommend the next learning topic
@@ -167,13 +173,26 @@ Claude Project was used to build and test the assistant. The agent's responses w
 
 The working Personal AI Learning & Career Agent is available here:
 
-https://claude.ai/share/c655926b-1c00-47a5-af25-3b4279f7f4d5
+[Claude Project — Personal AI Learning & Career Agent](https://claude.ai/share/c655926b-1c00-47a5-af25-3b4279f7f4d5)
 
 A Claude login may be required to access the shared agent.
 
+## Demo Video
+
+**Demo video:**
+*Add the unlisted YouTube link here after recording the demo.*
+
+The video shows a live end-to-end run of the agent, including:
+
+* Reviewing the connected project material
+* Identifying a learning gap
+* Recommending what to study next
+* Generating interview questions
+* Demonstrating the limitation/guardrail when exact model evaluation information is missing
+
 ## Project evidence
 
-The FL-07 build process included:
+The build process included:
 
 * A working Claude Project agent
 * A connected ML project README
@@ -184,7 +203,5 @@ The FL-07 build process included:
 ## Author
 
 **Faran Khan**
-
-AI Engineer / Machine Learning Engineering Intern
 
 Built as part of the FlyRank AI Internship Program.
