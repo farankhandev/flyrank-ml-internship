@@ -30,8 +30,8 @@ The first version was built using **Claude Project** rather than developing a se
 
 This kept the MVP small and allowed me to test the core workflow before adding more integrations.
 
-## Architecture
-                     USER
+#Architecture
+                    USER
                       │
                       ▼
         ┌─────────────────────────┐
@@ -84,23 +84,17 @@ I deliberately started with one real project file instead of connecting everythi
 
 ### Example prompts
 
+> Review my project material and identify one important learning gap.
 
-Review my project material and identify one important learning gap.
+> What should I study next based on the weaknesses you found?
 
+> Generate interview questions based on the areas I need to improve.
 
+> Connect the machine learning concepts in my project to the workflow described in the README.
 
-What should I study next based on the weaknesses you found?
+> What information is missing from my project material?
 
-Generate interview questions based on the areas I need to improve.
-
-Connect the machine learning concepts in my project to the workflow described in the README.
-
-
-
-What information is missing from my project material?
-
-
-Can you determine the exact test-set R² from the available README? If not, explain why.
+> Can you determine the exact test-set R² from the available README? If not, explain why.
 
 ## Evaluation and testing
 
