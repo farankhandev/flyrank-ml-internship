@@ -168,7 +168,10 @@ The working Personal AI Learning & Career Agent is available here:
 
 A Claude login may be required to access the shared agent.
 
+## Demo Video
 
+**Demo video:**
+(https://youtu.be/BkfK29Gx52M)
 
 The video shows a live end-to-end run of the agent, including:
 
