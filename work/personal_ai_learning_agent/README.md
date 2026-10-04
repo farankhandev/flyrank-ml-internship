@@ -33,7 +33,7 @@ This kept the MVP small and allowed me to test the core workflow before adding m
 
 ## Architecture
 
-                    USER
+                     USER
                       │
                       ▼
         ┌─────────────────────────┐
@@ -44,8 +44,8 @@ This kept the MVP small and allowed me to test the core workflow before adding m
                      │
           ┌──────────┴──────────┐
           ▼                     ▼
-   Project Material       General AI/ML
-   (House Price README)      Knowledge
+    Project Material       General AI/ML
+    (House Price README)      Knowledge
           │                     │
           └──────────┬──────────┘
                      ▼
