@@ -31,33 +31,28 @@ The first version was built using **Claude Project** rather than developing a se
 This kept the MVP small and allowed me to test the core workflow before adding more integrations.
 
 ## Architecture
-                ┌─────────────────────────┐
-                │   Personal AI Learning  │
-                │    & Career Assistant   │
-                └────────────┬────────────┘
-                             │
-                ┌────────────▼────────────┐
-                │      Claude Project     │
-                │   Agent instructions +  │
-                │       reasoning         │
-                └────────────┬────────────┘
-                             │
-                ┌────────────▼────────────┐
-                │   Connected project     │
-                │        material         │
-                │                         │
-                │  ML Project README      │
-                └────────────┬────────────┘
-                             │
-         ┌───────────────────┼──────────────────┐
-         │                   │                  │
-         ▼                   ▼                  ▼
-   Find gaps          Recommend learning    Generate practice
-         │                   │                  │
-         └───────────────────┼──────────────────┘
-                             ▼
-                     Human learning /
-                     career decision
+                     USER
+                      │
+                      ▼
+        ┌─────────────────────────┐
+        │ Personal AI Learning &  │
+        │      Career Agent       │
+        │     (Claude Project)    │
+        └────────────┬────────────┘
+                     │
+          ┌──────────┴──────────┐
+          ▼                     ▼
+   Project Material       General AI/ML
+   (House Price README)      Knowledge
+          │                     │
+          └──────────┬──────────┘
+                     ▼
+             Learning Support
+                     │
+        ┌────────────┼────────────┐
+        ▼            ▼            ▼
+    Find Gaps    Study Topics   Practice
+                               Questions
 
 
 ## Connected data
