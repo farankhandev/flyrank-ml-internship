@@ -68,6 +68,7 @@ The project does not currently use a custom API, database, or automated file-mod
 ## Architecture
 
 The current workflow can be represented as follows:
+
                  USER
                    |
                    v
