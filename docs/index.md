@@ -6,129 +6,214 @@
 
 ## Abstract
 
-This study investigates whether machine learning can help prioritize website content for human review when search impressions decline. Using anonymized Google Search Console performance data from April, May, and June 2026, the study compares Logistic Regression and Random Forest using five client-grouped train/test splits. Random Forest achieved a mean ROC-AUC of 0.6158, compared with 0.5357 for Logistic Regression. Its mean Precision@500 was 83.16%, compared with 66.92% for Logistic Regression. These preliminary results suggest that Random Forest may help rank potentially declining content for review. However, performance varied across splits, and the experiment does not establish causation or prove that refreshing content improves search performance.
+Website content does not always maintain the same level of search visibility over time. Some pages receive fewer impressions than before, making it difficult for analysts to decide which pages need attention first. This study explores whether machine learning can help prioritize website content for human review based on changes in search impressions.
+
+Using anonymized Google Search Console performance data from April, May, and June 2026, the study develops a dataset of 91,033 eligible content items. Historical performance from April and May is used to construct features, while June performance determines whether an item meets the defined declining-impressions label. Logistic Regression and Random Forest are compared using five client-grouped train/test splits.
+
+Random Forest achieved a mean ROC-AUC of 0.6164, compared with 0.6112 for Logistic Regression. It also achieved a mean accuracy of 66.42% and mean Precision@100 of 82.00%, compared with 65.71% and 72.80%, respectively, for Logistic Regression. These results suggest that Random Forest may be useful for creating a preliminary list of content items to investigate. However, the difference in ROC-AUC is small, and the experiment does not establish performance on future months or prove that refreshing content improves search rankings. The findings should therefore be treated as exploratory evidence for a human-review workflow rather than proof of a reliable forecasting system.
 
 ## 1. Research Question
 
-Can machine learning rank website content by its likelihood of meeting a defined declining-impressions label, helping analysts decide which pages to investigate first?
+Can machine learning rank website content according to its likelihood of meeting a defined declining-impressions label, helping analysts decide which pages to investigate first?
 
-The objective is prioritization for human review, not automatic content changes or guaranteed search-performance improvement.
+The main objective is to support prioritization. Rather than reviewing every page manually, analysts could use model rankings to identify a smaller group of pages for further investigation.
+
+The model is not intended to make content changes automatically. A decline in impressions can have different explanations, and a model score alone cannot determine what action should be taken or whether that action will improve performance.
 
 ## 2. Data and Target Definition
 
-The modeling dataset contains 91,033 content items from anonymized daily search-performance records covering April, May, and June 2026. Historical features were derived from April and May, while June performance was used to define the outcome.
+The study uses anonymized daily search-performance records covering April, May, and June 2026. The modeling dataset contains 91,033 eligible content items across 43 clients.
 
-An item was labeled as declining when its June impressions fell below 80% of its historical average daily impressions normalized to a 30-day rate, provided that it had at least 20 observed days in June. Historical eligibility required at least 100 historical impressions and 40 historical observation days.
+April and May provide the historical information used to construct the model features. June performance is used to define the target variable.
 
-The dataset contains:
+An item is labeled as declining when its June impressions, normalized to a 30-day rate using its observed reporting days, are below 80% of its historical normalized impression rate. Historical eligibility requires at least 100 historical impressions and 40 historical observation days. An item must also have at least 20 observed reporting days in June.
 
-- **64,003 declining items (70.31%)**
-- **27,030 non-declining items (29.69%)**
+The resulting dataset contains:
 
-This definition does not compare two necessarily complete consecutive 30-day windows. June observation coverage may vary between items.
+| Target label | Number of items | Percentage |
+|---|---:|---:|
+| Declining | 61,737 | 67.82% |
+| Non-declining | 29,296 | 32.18% |
+| **Total** | **91,033** | **100.00%** |
+
+The target is imbalanced because approximately two-thirds of the eligible items meet the declining-impressions definition.
+
+An important detail is that the comparison does not necessarily involve two complete, consecutive 30-day periods for every item. Reporting coverage can differ between content items, so the normalized rates should be interpreted with this limitation in mind. The label identifies a measured change in impressions under the study's definition; it does not explain why that change occurred.
 
 ## 3. Features and Methodology
 
-Five features were used:
+### 3.1 Feature Selection
 
-- `hist_impressions`
-- `hist_days`
-- `historical_30d_impressions`
-- `hist_clicks`
-- `weighted_position`
+Four historical features were used in the latest experiment:
 
-The weighted-position feature is an approximate proxy and may not exactly match Google's reported average position. Client identifiers were used for grouping, not as model features.
+- `hist_impressions`: Total impressions recorded during the historical period.
+- `hist_clicks`: Total clicks recorded during the historical period.
+- `hist_days`: Combined number of observed reporting days in April and May.
+- `historical_30d_impressions`: Historical impressions normalized to a 30-day rate using the available historical observation days.
 
-Two models were compared:
+These features summarize historical search performance and the amount of reporting coverage available for each item. Client identifiers are used to separate training and test groups, not as model input features.
 
-- **Logistic Regression:** A standardized baseline model.
-- **Random Forest:** 200 trees, `min_samples_leaf=10`, and `random_state=42`.
+The historical impression total and normalized impression rate are closely related. Consequently, the model may rely on overlapping information when using both features. This should be considered when interpreting feature importance.
 
-Both models were evaluated on the same five `GroupShuffleSplit` client-grouped splits using `test_size=0.25` and `random_state=123`. Each split held out 11 clients, with no client overlap between training and test sets.
+### 3.2 Models
 
-Metrics included ROC-AUC, accuracy, and Precision@K for K = 50, 100, and 500. Precision@K measures the proportion of labeled declining items among the highest-ranked K items.
+Two classification models were evaluated.
+
+**Logistic Regression** was used as a baseline. The features were standardized before model fitting, and the model was configured with `max_iter=1000` and `random_state=42`.
+
+**Random Forest** was used to test whether a tree-based model could provide better ranking performance. It was configured with 200 trees, `min_samples_leaf=10`, and `random_state=42`.
+
+Both models used the same feature set and were evaluated on the same client-grouped splits.
+
+### 3.3 Validation Strategy
+
+The experiment used five `GroupShuffleSplit` train/test splits, with `test_size=0.25` and `random_state=123`. Each split held out 11 clients, and no client appeared in both the training and test groups within that split.
+
+This approach evaluates whether the models can distinguish declining from non-declining content for clients excluded from the corresponding training split. The test sets differ in size because clients contribute different numbers of content items.
+
+The five splits are repeated evaluations, not five fully independent experiments. Test groups may overlap between different splits, so the reported mean metrics summarize the repeated evaluations rather than five independent samples.
+
+### 3.4 Evaluation Metrics
+
+Three metrics were reported in the latest comparison:
+
+- **ROC-AUC:** Measures how well a model ranks positive examples above negative examples across classification thresholds.
+- **Accuracy:** Measures the proportion of test items classified correctly at the selected threshold of 0.5.
+- **Precision@100:** Measures the proportion of items carrying the declining label among the 100 highest-ranked items in a test split, or among all available test items if fewer than 100 are available.
+
+Precision@100 is particularly relevant to this study because the intended use is to help analysts decide which items to investigate first. It does not mean that the model has identified pages whose future performance is guaranteed to decline.
 
 ## 4. Results
 
 ### 4.1 Model Comparison
 
+The table below reports the mean results across the five client-grouped splits.
+
 | Metric | Logistic Regression | Random Forest |
 |---|---:|---:|
-| Mean ROC-AUC | 0.5357 | 0.6158 |
-| Mean Precision@50 | 65.20% | 82.00% |
-| Mean Precision@100 | 66.60% | 80.60% |
-| Mean Precision@500 | 66.92% | 83.16% |
-| Mean accuracy | 68.04% | 67.81% |
+| Mean ROC-AUC | 0.6112 | 0.6164 |
+| Mean accuracy | 65.71% | 66.42% |
+| Mean Precision@100 | 72.80% | 82.00% |
 
-Random Forest achieved higher mean ROC-AUC and Precision@K at all three K values. Accuracy was similar between the models, illustrating why accuracy alone may not reflect performance on a prioritization task.
+Random Forest performed slightly better than Logistic Regression on all three reported metrics. The difference in mean ROC-AUC was only 0.0052, indicating that the models had similar overall ranking discrimination in these evaluations.
 
-### 4.2 Precision@K Comparison
+The larger difference appeared in Precision@100. Random Forest achieved 82.00%, compared with 72.80% for Logistic Regression. In practical terms, this means that a higher proportion of the highest-ranked items met the study's declining-impressions definition under the Random Forest evaluations.
 
-![Precision at K comparison](assets/precision_at_k_comparison.png)
+This result suggests potential value for prioritizing a limited review queue. Nevertheless, it should not be interpreted as evidence that the model will achieve the same precision on future data. The evaluation covers a specific set of clients and a particular three-month period.
 
-The chart compares mean Precision@50, Precision@100, and Precision@500 across the five client-grouped splits.
+### 4.2 Model Comparison Chart
 
-Random Forest achieved mean Precision@500 of 83.16%, compared with 66.92% for Logistic Regression. This indicates that, in these experiments, a greater proportion of the top 500 items ranked by Random Forest met the defined declining-impressions label. The result should not be interpreted as proof of future performance on unseen periods.
+![Model comparison across five client-grouped splits](assets/model_comparison.png)
+
+The model comparison chart presents mean ROC-AUC, accuracy, and Precision@100 for the two models. It highlights the small difference in overall discrimination and the larger difference in the top-100 ranking metric.
+
+These metrics measure different aspects of performance. ROC-AUC evaluates ranking discrimination across thresholds, while accuracy evaluates predictions at a particular threshold. Precision@100 focuses on the items that would be reviewed first. For the intended prioritization task, all three provide useful but distinct information.
 
 ### 4.3 Random Forest Feature Importance
 
-![Random Forest feature importance](assets/feature_importance.png)
+![Random Forest feature importance](assets/feature_importance_new.png)
 
-Feature importance indicates how the fitted model used its input features. It does not establish that any feature causes content decline. Importance values may also vary across training splits and should be interpreted as model-specific rather than universal relationships.
+A Random Forest model was fitted on the full modeling dataset to examine how it used the four historical features. Its feature-importance values were:
+
+| Feature | Importance |
+|---|---:|
+| `hist_impressions` | 40.32% |
+| `historical_30d_impressions` | 37.11% |
+| `hist_clicks` | 15.20% |
+| `hist_days` | 7.37% |
+
+Historical impressions received the highest importance, followed closely by historical 30-day impressions. Together, these features account for 77.43% of the fitted model's total feature importance.
+
+This pattern suggests that historical impression information played a substantial role in the model's decisions. However, feature importance does not establish causation. It also does not show that one feature independently contributes the same amount of useful information as another, particularly when features are closely related.
+
+These values describe a model fitted on the full dataset. They are not averages across the five validation splits, and their relative importance may change with different samples or model settings.
 
 ### 4.4 Target Distribution
 
-![Target distribution](assets/target_distribution.png)
+The target distribution consists of 61,737 declining items (67.82%) and 29,296 non-declining items (32.18%).
 
-The target is imbalanced, with approximately 70.31% of items labeled as declining and 29.69% labeled as non-declining. Because the positive class is the majority, accuracy should be interpreted alongside ranking metrics and the target distribution.
+The majority class matters when interpreting model accuracy. A useful evaluation should consider whether the model ranks the relevant items effectively, rather than relying on accuracy alone. This is one reason ROC-AUC and Precision@100 are included alongside accuracy.
 
-### 4.5 Evaluation Summary
+The target distribution also reflects the particular threshold and eligibility rules used in this experiment. A different decline threshold or reporting-coverage requirement could produce a different balance between the two classes.
+
+### 4.5 Variation Across Evaluation Splits
+
+The five validation splits produced different results:
 
 | Split | Test-set rows | Held-out clients | Test decline rate |
 |---:|---:|---:|---:|
-| 1 | 38,888 | 11 | 74.65% |
-| 2 | 14,684 | 11 | 56.82% |
-| 3 | 28,990 | 11 | 67.42% |
-| 4 | 32,782 | 11 | 70.33% |
-| 5 | 27,292 | 11 | 71.32% |
+| 1 | 38,888 | 11 | 72.25% |
+| 2 | 14,684 | 11 | 54.78% |
+| 3 | 28,990 | 11 | 63.77% |
+| 4 | 32,782 | 11 | 68.10% |
+| 5 | 27,292 | 11 | 67.95% |
 
-Test-set sizes and decline rates varied across splits because client groups differ in size and content composition. The 25% test setting applies to the client groups selected by the splitter; it does not guarantee that exactly 25% of content rows appear in every test set.
+The test-set sizes and decline rates vary because the held-out client groups have different numbers of items and different target distributions. The configured test fraction applies to the group-splitting procedure; it does not guarantee that every test set contains exactly 25% of all content rows.
 
-The validation approach tests generalization to held-out client groups within the available data. It does not by itself establish generalization to future months.
+The variation in target rates also helps explain why model performance should be assessed across several splits rather than relying on a single result. Although the mean scores favor Random Forest, the small difference in mean ROC-AUC does not establish that it is consistently superior in all settings.
+
+The evaluation tests generalization to held-out clients within the available dataset. It does not establish how well the models will perform on future months, and additional time-based validation is needed before operational use.
 
 ## 5. Limitations
 
-1. **Modest discrimination:** Random Forest's mean ROC-AUC was 0.6158, indicating limited separation between declining and non-declining items.
-2. **Variation across clients:** ROC-AUC ranged from 0.5416 to 0.6609, and Precision@500 ranged from 66.20% to 93.00%.
-3. **Uneven observation periods:** June records required at least 20 observed days, while historical impressions were normalized to a 30-day rate.
-4. **Approximate feature measurement:** Weighted position may not exactly match Google's average-position metric.
-5. **Limited validation:** Five client-grouped splits do not establish performance on future periods or every client.
-6. **Potential temporal measurement concerns:** The target compares June performance against a historical normalized rate. Additional temporal validation is needed to determine how reliably the approach works across complete, later observation periods.
-7. **No causal evidence:** The model cannot establish why content declined or whether a content refresh will improve performance.
-8. **Experimental status:** The model should be treated as decision support for human review, not a production-ready forecasting system.
+Several limitations affect how the results should be interpreted.
+
+1. **Modest discrimination:** Random Forest achieved a mean ROC-AUC of 0.6164. This indicates some ranking ability, but the separation between declining and non-declining items remains limited.
+
+2. **Small ROC-AUC difference:** The difference between Random Forest and Logistic Regression was only 0.0052. Although Random Forest had higher mean ROC-AUC, the available results do not establish that this difference is statistically significant or that it will persist on new data.
+
+3. **Uneven reporting coverage:** Items were required to have at least 20 observed days in June, while historical impressions were normalized using the available reporting days. This does not guarantee complete or directly comparable observation windows.
+
+4. **Related features:** Historical impressions and historical 30-day impressions contain overlapping information. Their feature-importance values should not be treated as independent contributions or causal effects.
+
+5. **Limited validation period:** The experiment uses April–June 2026 data and five client-grouped splits. It does not independently test performance on later months or establish that the models will generalize to every client.
+
+6. **Variation in client composition:** The held-out groups differ in size and target distribution. As a result, the test-set composition and measured performance vary across splits.
+
+7. **No causal evidence:** The model predicts a defined label from historical measurements. It does not identify the reason for an impression decline and cannot establish whether refreshing a page will improve its search performance.
+
+8. **Exploratory status:** The experiment supports investigating machine learning for content prioritization, but it does not establish that the model is ready for production use. Additional validation, monitoring, and practical evaluation are needed.
 
 ## 6. Recommendations
 
-1. Use Random Forest rankings to create a preliminary queue of pages for human review.
-2. Investigate impressions, clicks, observation coverage, and search-position estimates for high-priority pages.
-3. Review search intent, content quality, freshness, competition, and technical issues before deciding what to change.
-4. Record changes and use controlled tests where practical.
-5. Evaluate future time periods and additional clients before relying on the model operationally.
-6. Monitor precision and the number of useful findings identified by the review process.
-7. Reassess the target definition and feature quality as more complete temporal data becomes available.
+The results suggest a cautious, human-led workflow for using model rankings.
 
-**Recommended workflow:** Model ranking → Human review → Content decision → Refresh or test → Monitor performance.
+1. **Start with a limited review queue.** Use Random Forest scores to identify a preliminary group of content items for investigation. Treat the ranking as a starting point rather than a final decision.
 
-The model should help analysts decide where to investigate first. It should not automatically trigger content changes or be treated as evidence that any particular intervention will improve rankings.
+2. **Check the underlying data.** Review historical impressions, clicks, reporting coverage, and the observed June performance before deciding whether an item requires attention.
+
+3. **Investigate possible explanations.** Analysts should examine search intent, content quality, freshness, competition, and technical issues where relevant. The model itself does not identify which explanation is correct.
+
+4. **Keep a record of decisions.** Document which pages were reviewed, what issues were identified, what changes were made, and what happened afterward. This can help evaluate whether the workflow is useful in practice.
+
+5. **Validate on later periods.** Test the approach on subsequent months that were not used to define the existing target. A time-based evaluation would provide more direct evidence about performance on future content changes.
+
+6. **Evaluate the review process.** Monitor how often high-ranked items reveal actionable issues, as well as precision and the amount of analyst time required. A model is useful only if its rankings support a practical decision process.
+
+7. **Review the target definition.** Compare the current normalized-rate approach with alternative definitions and more complete observation windows. This may help determine whether the label captures meaningful changes rather than differences in reporting coverage.
+
+8. **Reassess the models as more data becomes available.** Compare additional baselines and evaluate stability across clients and time periods before deciding whether the approach is suitable for regular operational use.
+
+**Recommended workflow:**
+
+Model ranking → Human review → Content decision → Refresh or test → Monitor performance
+
+The model should help analysts decide where to investigate first. It should not automatically trigger content changes or be treated as evidence that a particular intervention will improve rankings.
 
 ## 7. Conclusion
 
-Across five client-grouped splits, Random Forest outperformed Logistic Regression on mean ROC-AUC and Precision@K, while mean accuracy was similar. The results suggest potential value in ranking content for investigation, but the model's discrimination remains modest and performance varies between clients.
+This study explored whether machine learning could help prioritize website content that meets a defined declining-impressions label. Using anonymized Google Search Console data from April through June 2026, the experiment compared Logistic Regression and Random Forest across five client-grouped train/test splits.
 
-The work is an exploratory prioritization study. Further temporal validation and practical testing are required before making operational or causal claims.
+Random Forest achieved a mean ROC-AUC of 0.6164, mean accuracy of 66.42%, and mean Precision@100 of 82.00%. Logistic Regression achieved corresponding values of 0.6112, 65.71%, and 72.80%. The results show a small difference in overall ranking discrimination and a larger difference in the proportion of labeled declining items among the highest-ranked items.
+
+These findings suggest that Random Forest may be worth investigating as a tool for creating a preliminary content-review queue. However, the model's discrimination remains modest, results vary with the held-out clients, and the experiment does not establish performance on future periods.
+
+The main contribution of this work is an exploratory evaluation of a machine-learning-based prioritization workflow. Further temporal validation and practical testing are necessary before relying on the approach operationally. Most importantly, identifying content that meets the declining-impressions label is not the same as explaining why it declined or proving that a content refresh will improve search performance.
 
 ## Reproducibility and Privacy
 
-The experiments use anonymized labels and do not require publication of client names, domains, URLs, or private search queries. The reported metrics should be interpreted alongside the validation design and limitations described above.
+The experiment uses anonymized data and does not require publishing client names, domains, page URLs, or private search queries. Public reporting should continue to avoid exposing identifying information from the underlying warehouse.
 
-The reported results were obtained using the five client-grouped evaluation splits described in this paper. The model settings, feature definitions, target definition, and evaluation metrics should be retained with the notebook to support reproducibility.
+Reproducibility depends on retaining the notebook, target definition, feature definitions, model settings, split configuration, and evaluation metrics. The results in this paper correspond to the latest reported experiment using four historical features and five client-grouped splits.
+
+The study is exploratory and intended for research and educational purposes. Its findings should be interpreted within the stated data, validation, and measurement limitations.
